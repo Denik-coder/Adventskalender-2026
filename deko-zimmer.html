@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deko Zimmer – Funko POP! Wunschliste</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-color: #38bdf8;
+      --accent-hover: #0284c7;
+      --price-color: #10b981;
+      --discount-color: #e11d48;
+      --border-color: #334155;
+      --top-color: #facc15;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 2rem 1rem 3rem;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto 2.5rem auto;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.5;
+    }
+
+    section {
+      max-width: 1200px;
+      margin: 0 auto 3rem auto;
+    }
+
+    section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+      color: #ffffff;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .card.top {
+      border: 2px solid var(--top-color);
+    }
+
+    .img-container {
+      position: relative;
+      width: 100%;
+      height: 260px;
+      background-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: filter 0.3s ease, opacity 0.3s ease;
+    }
+
+    .hidden-preview {
+      filter: blur(8px);
+      opacity: 0.3;
+    }
+
+    .price-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background-color: var(--price-color);
+      color: #000;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .discount-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background-color: var(--discount-color);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-content {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #ffffff;
+    }
+
+    .fav-note {
+      color: var(--top-color);
+      font-size: 0.85rem;
+      font-style: italic;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin-bottom: 0.75rem;
+    }
+
+    .price-line {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      flex-grow: 1;
+    }
+
+    .price-line strong {
+      color: var(--price-color);
+      font-size: 1.05rem;
+    }
+
+    .price-line s {
+      margin-left: 0.4rem;
+    }
+
+    .savings {
+      display: block;
+      margin-top: 0.2rem;
+      color: var(--discount-color);
+      font-weight: 600;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-color);
+      color: #0f172a;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .toggle-preview {
+      background-color: #334155;
+      color: #fff;
+    }
+
+    .toggle-preview:hover {
+      background-color: #475569;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+      .back { max-width: 1200px; margin: 0 auto 1.5rem auto; }
+    .back a { color: var(--accent-color); text-decoration: none; font-weight: 600; }
+      .btn small { display: block; font-weight: 400; font-size: 0.75rem; opacity: 0.85; margin-top: 2px; }
+      .shop-logo { height: 16px; width: auto; vertical-align: middle; margin: 0 2px; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+  <p class="back"><a href="hauptseite.html">← Zurück zur Startseite</a></p>
+
+  <header>
+    <h1>🎄 Deko Zimmer</h1>
+    <p>Meine Wunschliste: Funko POP! Figuren und weitere Kleinigkeiten für mein Zimmer.</p>
+  </header>
+
+  <!-- TOP 3 -->
+  <section>
+    <h2>⭐ Meine Top 3</h2>
+    <main class="grid-container">
+
+      <article class="card top">
+        <div class="img-container">
+          <img id="img-hulk" src="bilder/hulkbuster.jpg" alt="Hulkbuster mit Iron Man">
+          <span class="discount-badge">-46 %</span>
+          <span class="price-badge">15,40 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Hulkbuster mit Iron Man</h3>
+          <p class="fav-note">(Mein Liebling)</p>
+          <p class="card-desc">Bitty POP! Bitty Bot aus The Infinity Saga, 2 Figuren in einer Box.</p>
+          <p class="price-line">Statt <s>28,68 €</s><span class="savings">Du sparst 13,28 €</span></p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-hulk', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B0D1D5WPXV/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card top">
+        <div class="img-container">
+          <img id="img-grogu" src="bilder/grogu.jpg" alt="Grogu mit Snack">
+          <span class="discount-badge">-20 %</span>
+          <span class="price-badge">12,80 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Grogu mit Snack (Mandalorian)</h3>
+          <p class="fav-note">(Mein Liebling)</p>
+          <p class="card-desc">Star Wars, Nr. 841, Bobblehead.</p>
+          <p class="price-line">UVP <s>16,00 €</s><span class="savings">Du sparst 3,20 €</span></p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-grogu', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B08HH72K6J/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card top">
+        <div class="img-container">
+          <img id="img-ghost" src="bilder/ghost-face.jpg" alt="Ghost Face aus Scream">
+          <span class="price-badge">16,00 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Ghost Face (Scream)</h3>
+          <p class="fav-note">(Buuuuuuuh!!!!!!!)</p>
+          <p class="card-desc">Movies, Nr. 1607, Vinyl-Sammelfigur.</p>
+          <p class="price-line">Regulärer Preis</p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-ghost', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B0CND1KMSD/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+    </main>
+  </section>
+
+  <!-- WEITERE IDEEN -->
+  <section>
+    <h2>Weitere Ideen</h2>
+    <main class="grid-container">
+
+      <article class="card">
+        <div class="img-container">
+          <img id="img-vecna" src="bilder/vecna.jpg" alt="Vecna aus Stranger Things">
+          <span class="price-badge">13,60 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Vecna (Stranger Things)</h3>
+          <p class="card-desc">Television, Nr. 1806, Vinyl-Sammelfigur.</p>
+          <p class="price-line">Regulärer Preis</p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-vecna', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B08HH6PNP7/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="img-container">
+          <img id="img-thor" src="bilder/thor.jpg" alt="Thor aus Avengers Doomsday">
+          <span class="price-badge">15,99 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Thor (Avengers: Doomsday)</h3>
+          <p class="card-desc">Marvel, Nr. 1637, Bobblehead.</p>
+          <p class="price-line">Regulärer Preis</p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-thor', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B0GNS5V632/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="img-container">
+          <img id="img-harry" src="bilder/harry-potter.jpg" alt="Harry Potter mit Stein">
+          <span class="discount-badge">-36 %</span>
+          <span class="price-badge">10,26 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Harry Potter</h3>
+          <p class="card-desc">Harry Potter, Nr. 196, Vinyl-Sammelfigur.</p>
+          <p class="price-line">UVP <s>16,00 €</s><span class="savings">Du sparst 5,74 €</span></p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-harry', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B0F9YR68RR/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="img-container">
+          <img id="img-maul" src="bilder/maul.jpg" alt="Darth Maul">
+          <span class="discount-badge">-20 %</span>
+          <span class="price-badge">12,80 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Darth Maul (Star Wars)</h3>
+          <p class="card-desc">Star Wars, Nr. 828, Bobblehead.</p>
+          <p class="price-line">UVP <s>16,00 €</s><span class="savings">Du sparst 3,20 €</span></p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-maul', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B08HH567L5/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="img-container">
+          <img id="img-superman" src="bilder/superman.jpg" alt="Superman 2025">
+          <span class="discount-badge">-20 %</span>
+          <span class="price-badge">12,80 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Superman (2025)</h3>
+          <p class="card-desc">Heroes, Nr. 562, Vinyl-Sammelfigur.</p>
+          <p class="price-line">UVP <s>16,00 €</s><span class="savings">Du sparst 3,20 €</span></p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-superman', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B0DGBZBJCC/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="img-container">
+          <img id="img-patrick" src="bilder/patrick-star.jpg" alt="Patrick Star als Pirat">
+          <span class="discount-badge">-30 %</span>
+          <span class="price-badge">11,20 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Patrick Star (SpongeBob Movie)</h3>
+          <p class="card-desc">Movies, Nr. 1939, Vinyl-Sammelfigur.</p>
+          <p class="price-line">UVP <s>16,00 €</s><span class="savings">Du sparst 4,80 €</span></p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-patrick', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B0DZXTQF4X/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="img-container">
+          <img id="img-winter" src="bilder/winter-soldier.jpg" alt="Winter Soldier">
+          <span class="price-badge">16,00 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Winter Soldier (Metallic)</h3>
+          <p class="card-desc">Marvel, Nr. 1673, Bobblehead. Aktuell nur vorbestellbar.</p>
+          <p class="price-line">Regulärer Preis</p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-winter', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B07JJF5T5W/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="img-container">
+          <img id="img-gollum" src="bilder/gollum.jpg" alt="Gollum leuchtet im Dunkeln">
+          <span class="price-badge">14,99 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Gollum (leuchtet im Dunkeln)</h3>
+          <p class="card-desc">Plus, Nr. 1831, Glow in the Dark.</p>
+          <p class="price-line">Regulärer Preis</p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-gollum', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B0DP7B8NX5/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="img-container">
+          <img id="img-gizmo" src="bilder/gizmo.jpg" alt="Gizmo mit 3D-Brille">
+          <span class="price-badge">16,00 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Gizmo mit 3D-Brille</h3>
+          <p class="card-desc">Movies, Nr. 1146, Vinyl-Sammelfigur.</p>
+          <p class="price-line">Regulärer Preis</p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-gizmo', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B084J116LN/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="img-container">
+          <img id="img-rambo" src="bilder/rambo.jpg" alt="John Rambo">
+          <span class="discount-badge">-25 %</span>
+          <span class="price-badge">11,99 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">John Rambo</h3>
+          <p class="card-desc">Rambo, Nr. 2003, Vinyl-Sammelfigur.</p>
+          <p class="price-line">UVP <s>16,00 €</s><span class="savings">Du sparst 4,01 €</span></p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-rambo', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B0FG3T3ZQQ/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="img-container">
+          <img id="img-legolas" src="bilder/legolas.jpg" alt="Legolas">
+          <span class="discount-badge">-30 %</span>
+          <span class="price-badge">11,20 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Legolas (Herr der Ringe)</h3>
+          <p class="card-desc">Movies, Nr. 628, Vinyl-Sammelfigur.</p>
+          <p class="price-line">UVP <s>16,00 €</s><span class="savings">Du sparst 4,80 €</span></p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-legolas', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B07DFDV368/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+
+          <article class="card">
+        <div class="img-container">
+          <img id="img-fox" src="bilder/fox.jpg" alt="Glorious Fox Switch Toy">
+          <span class="price-badge">6,43 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Glorious Fox Switch Toy (Fox)</h3>
+          <p class="card-desc">Kleine Fuchs-Figur aus dem Glorious-Zubehör für Maus und Tastatur.</p>
+          <p class="price-line">Mengenrabatt: ab 2 Stück 5,49 € pro Stück (-15 %)</p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-fox', this)">Verbergen</button>
+            <a href="https://www.galaxus.de/de/s1/product/glorious-fox-switch-toy-figur-fox-maus-tastatur-zubehoer-24122329" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-galaxus.png" alt="galaxus"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+    </main>
+  </section>
+
+  <footer>
+    Preise laut Amazon-Stand vom 21.11.2026 und können sich ändern.
+  </footer>
+
+  <script>
+    function toggleBlur(imageId, btn) {
+      const img = document.getElementById(imageId);
+      const nowBlurred = img.dataset.blurred !== 'true';
+      img.dataset.blurred = nowBlurred ? 'true' : 'false';
+      img.style.filter = nowBlurred ? 'blur(8px)' : 'none';
+      img.style.opacity = nowBlurred ? '0.3' : '1';
+      btn.textContent = nowBlurred ? 'Anzeigen' : 'Verbergen';
+    }
+  </script>
+</body>
+</html>

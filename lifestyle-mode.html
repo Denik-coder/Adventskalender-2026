@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lifestyle (Mode) – Wunschliste</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-color: #38bdf8;
+      --accent-hover: #0284c7;
+      --price-color: #10b981;
+      --discount-color: #e11d48;
+      --border-color: #334155;
+      --top-color: #facc15;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 2rem 1rem 3rem;
+      min-height: 100vh;
+    }
+
+    .back {
+      max-width: 1200px;
+      margin: 0 auto 1.5rem auto;
+    }
+
+    .back a {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    header {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto 2.5rem auto;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.5;
+    }
+
+    section {
+      max-width: 1200px;
+      margin: 0 auto 3rem auto;
+    }
+
+    section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+      color: #ffffff;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .card.top {
+      border: 2px solid var(--top-color);
+    }
+
+    .img-container {
+      position: relative;
+      width: 100%;
+      height: 260px;
+      background-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: filter 0.3s ease, opacity 0.3s ease;
+    }
+
+    .hidden-preview {
+      filter: blur(8px);
+      opacity: 0.3;
+    }
+
+    .price-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background-color: var(--price-color);
+      color: #000;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .discount-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background-color: var(--discount-color);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-content {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #ffffff;
+    }
+
+    .fav-note {
+      color: var(--top-color);
+      font-size: 0.85rem;
+      font-style: italic;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin-bottom: 0.75rem;
+    }
+
+    .price-line {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      flex-grow: 1;
+    }
+
+    .price-line s {
+      margin-left: 0.4rem;
+    }
+
+    .savings {
+      display: block;
+      margin-top: 0.2rem;
+      color: var(--discount-color);
+      font-weight: 600;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-color);
+      color: #0f172a;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .toggle-preview {
+      background-color: #334155;
+      color: #fff;
+    }
+
+    .toggle-preview:hover {
+      background-color: #475569;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+      .btn small { display: block; font-weight: 400; font-size: 0.75rem; opacity: 0.85; margin-top: 2px; }
+      .shop-logo { height: 16px; width: auto; vertical-align: middle; margin: 0 2px; border-radius: 2px; }
+  
+    .italic { font-style: italic; }
+    .btn small { display: block; font-weight: 400; font-size: 0.75rem; opacity: 0.85; margin-top: 2px; }
+    .shop-logo { height: 16px; width: auto; vertical-align: middle; margin: 0 2px; border-radius: 2px; }
+    .img-container img.cover { object-fit: cover; }
+    .empty { color: var(--text-muted); text-align: center; margin: 2rem auto; max-width: 600px; }
+</style>
+</head>
+<body>
+
+  <p class="back"><a href="hauptseite.html">← Zurück zur Startseite</a></p>
+
+  <header>
+    <h1>👗 Lifestyle (Mode)</h1>
+    <p>Meine Wunschliste: Mode-Ideen für mein Zimmer und mich.</p>
+  </header>
+
+  <p class="empty">Hier kommen bald die ersten Objekte rein.</p>
+
+  <script>
+    function toggleBlur(imageId, btn) {
+      const img = document.getElementById(imageId);
+      const nowBlurred = img.dataset.blurred !== 'true';
+      img.dataset.blurred = nowBlurred ? 'true' : 'false';
+      img.style.filter = nowBlurred ? 'blur(8px)' : 'none';
+      img.style.opacity = nowBlurred ? '0.3' : '1';
+      btn.textContent = nowBlurred ? 'Anzeigen' : 'Verbergen';
+    }
+  </script>
+</body>
+</html>

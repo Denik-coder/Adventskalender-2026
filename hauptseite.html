@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adventskalender 2026 (Niklas)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      color: #f8fafc;
+      background: #0f172a url('bilder/hintergrund.jpg') center / cover no-repeat fixed;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(15, 23, 42, 0.35), rgba(15, 23, 42, 0.8));
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 2.6rem;
+      color: #ffffff;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+    }
+
+    header p {
+      color: #e2e8f0;
+      margin-top: 0.5rem;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    .tiles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .tile {
+      display: flex;
+      flex-direction: column;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid #334155;
+      border-radius: 14px;
+      overflow: hidden;
+      text-decoration: none;
+      color: #ffffff;
+      backdrop-filter: blur(4px);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .tile:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .tile img {
+      width: 100%;
+      height: 200px;
+      object-fit: contain;
+      background: #ffffff;
+    }
+
+    .tile span {
+      padding: 1.1rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .tile small {
+      display: block;
+      font-weight: 400;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Schneeflocken */
+    .snow {
+      position: fixed;
+      top: -20px;
+      color: #ffffff;
+      pointer-events: none;
+      user-select: none;
+      z-index: 2;
+      animation-name: fall;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+    }
+
+    @keyframes fall {
+      0%   { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(30px, 110vh, 0); }
+    }
+      .tile img.cover { object-fit: cover; }
+    .italic { font-style: italic; }
+  </style>
+</head>
+<body>
+
+  <div class="content">
+    <header>
+      <h1>🎄 Adventskalender 2026 (Niklas)</h1>
+      <p>Wähle eine Kategorie</p>
+    </header>
+
+    <nav class="tiles">
+      <a class="tile" href="deko-zimmer.html">
+        <img src="bilder/hulkbuster.jpg" alt="Funko POP! Figuren">
+        <span>Deko Zimmer<small>15 Ideen</small></span>
+      </a>
+      <a class="tile" href="technik-gadgets.html">
+        <img src="bilder/pixel9-huelle.jpg" alt="Technik Gadgets">
+        <span>Technik Gadgets<small>6 Ideen</small></span>
+      </a>
+      <a class="tile" href="lifestyle-mode.html">
+        <img class="cover" src="bilder/lifestyle-mode.jpg" alt="Lifestyle Mode">
+        <span>Lifestyle (Mode)<small>Ideen folgen</small></span>
+      </a>
+      <a class="tile" href="potenzielle-weihnachtsgeschenke.html">
+        <img class="cover" src="bilder/geheimnis.jpg" alt="Potenzielle Weihnachtsgeschenke">
+        <span class="italic">Potenzielle Weihnachtsgeschenke<small>2 Ideen</small></span>
+      </a>
+    </nav>
+  </div>
+
+  <script>
+    (function () {
+      const count = 70;
+      for (let i = 0; i < count; i++) {
+        const flake = document.createElement('span');
+        flake.className = 'snow';
+        flake.textContent = '❄';
+        const dur = 8 + Math.random() * 12;
+        flake.style.fontSize = (8 + Math.random() * 16) + 'px';
+        flake.style.left = (Math.random() * 100) + 'vw';
+        flake.style.opacity = (0.4 + Math.random() * 0.6).toFixed(2);
+        flake.style.animationDuration = dur + 's';
+        flake.style.animationDelay = (-Math.random() * dur) + 's';
+        document.body.appendChild(flake);
+      }
+    })();
+  </script>
+</body>
+</html>

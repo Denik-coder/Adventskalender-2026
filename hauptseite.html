@@ -351,7 +351,7 @@
         <h2>📈 Finanzen</h2>
         <span class="stand" id="finStand">wird geladen …</span>
         <div id="finOut"></div>
-        <p class="wnote">Wechselkurse von der Europäischen Zentralbank (über Frankfurter), Aktien von Yahoo Finance, Kryptowährungen von CoinGecko. US-Aktien werden mit dem aktuellen Dollarkurs in Euro umgerechnet. Aktualisiert sich stündlich von selbst.</p>
+        <p class="wnote">Wechselkurse von der Europäischen Zentralbank (über Frankfurter), Aktien stündlich über GitHub von Finnhub und Stooq, Kryptowährungen von CoinGecko. US-Aktien werden mit dem aktuellen Dollarkurs in Euro umgerechnet. Aktualisiert sich stündlich von selbst.</p>
       </div>
 
       <div class="widget">
@@ -544,7 +544,8 @@
   (function () {
     var out = document.getElementById('finOut');
     var stand = document.getElementById('finStand');
-    var KEY = 'fin-cache-v3';
+    var KEY = 'fin-cache-v4';
+    var aktienStand = null;
 
     /* Stooq-Kuerzel, Name, Waehrung, Yahoo-Kuerzel */
     var AKTIEN = [
@@ -592,6 +593,16 @@
       out.appendChild(titel('Aktien in Euro'));
       if (d.aktien && d.aktien.length) {
         d.aktien.forEach(function (a) { out.appendChild(zeile(a.name, eur(a.eur, 2), a.ch)); });
+        if (aktienStand) {
+          var st = new Date(aktienStand);
+          if (!isNaN(st)) {
+            var n = hinweis('Kurse vom ' + st.toLocaleDateString('de-DE') + ', ' +
+                            st.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr');
+            n.style.fontSize = '0.72rem';
+            n.style.marginTop = '0.3rem';
+            out.appendChild(n);
+          }
+        }
       } else if (d.aktien === undefined) {
         out.appendChild(hinweis('werden geladen \u2026'));
       } else {
@@ -663,8 +674,16 @@
       };
     }
 
-    /* Zuerst Yahoo, danach Stooq als Ersatz */
+    /* Zuerst die eigene Datei aus dem Repository (von der GitHub Action gefuellt),
+       danach Yahoo, danach Stooq */
     async function aktien(usdProEuro) {
+      var eigen = await direktJson('aktien.json?t=' + Date.now(), 5000);
+      if (eigen && eigen.aktien && eigen.aktien.length) {
+        aktienStand = eigen.stand || null;
+        return eigen.aktien;
+      }
+      aktienStand = null;
+
       var ergebnis = await Promise.all(AKTIEN.map(function (a) {
         return yahoo(a, usdProEuro).catch(function () { return null; });
       }));

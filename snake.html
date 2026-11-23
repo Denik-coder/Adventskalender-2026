@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="bilder/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="bilder/favicon-512.png">
+  <link rel="apple-touch-icon" href="bilder/apple-touch-icon.png">
+<title>Snake</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--text:#f8fafc;--muted:#94a3b8;--accent:#38bdf8;
+  --accent-text:#0f172a;--border:#334155;--grid:#16233c;--snake:#22c55e;--head:#4ade80;--food:#ef4444}
+:root[data-theme="light"]{--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--accent:#0284c7;
+  --accent-text:#fff;--border:#cbd5e1;--grid:#e2e8f0;--snake:#16a34a;--head:#22c55e;--food:#dc2626}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:1.1rem 1rem 2rem;
+  display:flex;flex-direction:column;align-items:center}
+.top{width:100%;max-width:520px;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
+.top h1{font-size:1.5rem;margin-right:auto}
+.btn{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:10px;
+  padding:.45rem .8rem;font-size:.86rem;font-weight:600;cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;gap:.35rem}
+.btn:hover{filter:brightness(1.15)}
+.btn.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.scores{width:100%;max-width:520px;display:flex;gap:1rem;margin-bottom:.8rem}
+.sc{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.6rem .9rem;text-align:center}
+.sc span{display:block;font-size:.75rem;color:var(--muted);font-weight:600}
+.sc b{font-size:1.4rem;font-variant-numeric:tabular-nums}
+.stage{position:relative;width:100%;max-width:520px}
+canvas{width:100%;height:auto;display:block;background:var(--card);
+  border:1px solid var(--border);border-radius:14px;touch-action:none}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(15,23,42,.82);border-radius:14px;text-align:center;padding:1.5rem;backdrop-filter:blur(3px)}
+:root[data-theme="light"] .overlay{background:rgba(241,245,249,.9)}
+.overlay h2{font-size:1.5rem;margin-bottom:.4rem}
+.overlay p{color:var(--muted);font-size:.9rem;margin-bottom:1rem;line-height:1.5}
+.overlay[hidden]{display:none}
+.pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,64px);gap:.5rem;
+  margin-top:1rem;justify-content:center}
+.pad button{background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--text);
+  font-size:1.3rem;cursor:pointer}
+.pad button:active{background:var(--accent);color:var(--accent-text)}
+.pad .u{grid-column:2}
+.hint{color:var(--muted);font-size:.82rem;margin-top:1rem;text-align:center;max-width:520px;line-height:1.5}
+@media(hover:hover) and (pointer:fine){.pad{display:none}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>🐍 Snake</h1>
+  <a class="btn" href="hauptseite.html">← Startseite</a>
+  <button class="btn" id="themeBtn" type="button">🌙 Dunkel</button>
+</div>
+
+<div class="scores">
+  <div class="sc"><span>Punkte</span><b id="score">0</b></div>
+  <div class="sc"><span>Rekord</span><b id="best">0</b></div>
+</div>
+
+<div class="stage">
+  <canvas id="c" width="500" height="500"></canvas>
+  <div class="overlay" id="ov">
+    <h2 id="ovT">Snake</h2>
+    <p id="ovP">Sammle die roten Äpfel ein und stoß nirgends an.<br>Pfeiltasten oder wischen zum Steuern.</p>
+    <button class="btn primary" id="startBtn" type="button">Spiel starten</button>
+  </div>
+</div>
+
+<div class="pad">
+  <button class="u" data-d="up" type="button">▲</button>
+  <button data-d="left" type="button">◀</button>
+  <button data-d="down" type="button">▼</button>
+  <button data-d="right" type="button">▶</button>
+</div>
+
+<p class="hint">Am Computer: Pfeiltasten oder W A S D. Leertaste pausiert.
+Am Handy: über das Feld wischen oder die Knöpfe nutzen.</p>
+
+<script>
+(function(){
+  var root=document.documentElement,tb=document.getElementById("themeBtn");
+  function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function apply(m){root.dataset.theme=m;tb.textContent=m==="light"?"☀️ Hell":"🌙 Dunkel";set("theme",m);
+    var mt=document.querySelector('meta[name="theme-color"]');if(mt)mt.setAttribute("content",m==="light"?"#f1f5f9":"#0f172a");
+    if(window.zeichne) window.zeichne();}
+  apply(get("theme")==="light"?"light":"dark");
+  tb.addEventListener("click",function(){apply(root.dataset.theme==="light"?"dark":"light")});
+})();
+
+(function(){
+  var N = 20, Z = 25;                     // 20x20 Felder a 25 px
+  var cv = document.getElementById("c"), ctx = cv.getContext("2d");
+  var ov = document.getElementById("ov"), ovT = document.getElementById("ovT"), ovP = document.getElementById("ovP");
+  var scoreEl = document.getElementById("score"), bestEl = document.getElementById("best");
+
+  function get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function css(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+  var best = parseInt(get("snake-best") || "0", 10) || 0;
+  bestEl.textContent = best;
+
+  var schlange, richtung, naechste, futter, punkte, tempo, letzter, laeuft = false, pause = false, tot = false;
+
+  function start(){
+    schlange = [{x:9,y:10},{x:8,y:10},{x:7,y:10}];
+    richtung = {x:1,y:0}; naechste = {x:1,y:0};
+    punkte = 0; tempo = 230; tot = false; pause = false;
+    scoreEl.textContent = "0";
+    neuesFutter();
+    ov.hidden = true; laeuft = true; letzter = 0;
+    requestAnimationFrame(schleife);
+  }
+  function neuesFutter(){
+    var frei = [];
+    for (var y=0;y<N;y++) for (var x=0;x<N;x++){
+      var belegt = schlange.some(function(s){ return s.x===x && s.y===y; });
+      if (!belegt) frei.push({x:x,y:y});
+    }
+    futter = frei.length ? frei[Math.floor(Math.random()*frei.length)] : null;
+  }
+  function ende(){
+    laeuft = false; tot = true;
+    if (punkte > best){ best = punkte; set("snake-best", String(best)); bestEl.textContent = best; }
+    ovT.textContent = "Vorbei!";
+    ovP.innerHTML = "Du hast <b>" + punkte + "</b> " + (punkte===1?"Punkt":"Punkte") + " geschafft." +
+                    (punkte>=best && punkte>0 ? "<br>Das ist dein neuer Rekord!" : "<br>Rekord: " + best);
+    document.getElementById("startBtn").textContent = "Noch einmal";
+    ov.hidden = false;
+  }
+  function schritt(){
+    richtung = naechste;
+    var kopf = { x: schlange[0].x + richtung.x, y: schlange[0].y + richtung.y };
+    if (kopf.x<0 || kopf.y<0 || kopf.x>=N || kopf.y>=N) return ende();
+    for (var i=0;i<schlange.length-1;i++){
+      if (schlange[i].x===kopf.x && schlange[i].y===kopf.y) return ende();
+    }
+    schlange.unshift(kopf);
+    if (futter && kopf.x===futter.x && kopf.y===futter.y){
+      punkte++; scoreEl.textContent = punkte;
+      if (tempo > 120) tempo -= 4;
+      neuesFutter();
+    } else {
+      schlange.pop();
+    }
+  }
+  function zeichne(){
+    if (!schlange) return;
+    ctx.fillStyle = css("--card"); ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.strokeStyle = css("--grid"); ctx.lineWidth = 1;
+    for (var i=1;i<N;i++){
+      ctx.beginPath(); ctx.moveTo(i*Z+.5,0); ctx.lineTo(i*Z+.5,cv.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,i*Z+.5); ctx.lineTo(cv.width,i*Z+.5); ctx.stroke();
+    }
+    if (futter){
+      ctx.fillStyle = css("--food");
+      ctx.beginPath();
+      ctx.arc(futter.x*Z+Z/2, futter.y*Z+Z/2, Z*0.34, 0, Math.PI*2);
+      ctx.fill();
+    }
+    for (var j=schlange.length-1;j>=0;j--){
+      var s = schlange[j];
+      ctx.fillStyle = j===0 ? css("--head") : css("--snake");
+      var p = j===0 ? 2 : 3;
+      ctx.beginPath();
+      var r = 6, x = s.x*Z+p, y = s.y*Z+p, w = Z-p*2, h = Z-p*2;
+      ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+      ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); ctx.fill();
+    }
+  }
+  window.zeichne = zeichne;
+
+  function schleife(t){
+    if (!laeuft) return;
+    if (!letzter) letzter = t;
+    if (!pause && t - letzter >= tempo){ letzter = t; schritt(); }
+    zeichne();
+    if (laeuft) requestAnimationFrame(schleife);
+  }
+
+  function lenke(d){
+    if (!laeuft || pause) return;
+    var m = { up:{x:0,y:-1}, down:{x:0,y:1}, left:{x:-1,y:0}, right:{x:1,y:0} }[d];
+    if (!m) return;
+    if (m.x === -richtung.x && m.y === -richtung.y) return;   // nicht umdrehen
+    naechste = m;
+  }
+
+  document.addEventListener("keydown", function(e){
+    var k = e.key.toLowerCase();
+    var d = (k==="arrowup"||k==="w") ? "up" : (k==="arrowdown"||k==="s") ? "down" :
+            (k==="arrowleft"||k==="a") ? "left" : (k==="arrowright"||k==="d") ? "right" : null;
+    if (d){ e.preventDefault(); lenke(d); }
+    if (k === " " || k === "spacebar"){
+      e.preventDefault();
+      if (!laeuft && tot) start();
+      else if (laeuft){ pause = !pause; letzter = 0; }
+    }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".pad button"), function(b){
+    b.addEventListener("click", function(){ lenke(b.dataset.d); });
+  });
+
+  var sx = 0, sy = 0;
+  cv.addEventListener("touchstart", function(e){
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, {passive:true});
+  cv.addEventListener("touchend", function(e){
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) < 24 && Math.abs(dy) < 24) return;
+    lenke(Math.abs(dx) > Math.abs(dy) ? (dx>0?"right":"left") : (dy>0?"down":"up"));
+  }, {passive:true});
+
+  document.getElementById("startBtn").addEventListener("click", start);
+  ctx.fillStyle = css("--card"); ctx.fillRect(0,0,cv.width,cv.height);
+})();
+</script>
+</body>
+</html>

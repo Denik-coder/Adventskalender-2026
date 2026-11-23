@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Adventskalender">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="bilder/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="bilder/favicon-512.png">
+  <link rel="apple-touch-icon" href="bilder/apple-touch-icon.png">
   <title>Potenzielle Weihnachtsgeschenke – Wunschliste</title>
   <style>
     :root {
@@ -74,7 +83,8 @@
 
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 300px));
+      justify-content: center;
       gap: 1.5rem;
     }
 
@@ -243,11 +253,72 @@
     .shop-logo { height: 16px; width: auto; vertical-align: middle; margin: 0 2px; border-radius: 2px; }
     .img-container img.cover { object-fit: cover; }
     .empty { color: var(--text-muted); text-align: center; margin: 2rem auto; max-width: 600px; }
-</style>
+    :root[data-theme="light"] {
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent-color: #0284c7;
+      --accent-hover: #0369a1;
+      --border-color: #cbd5e1;
+      --top-color: #b45309;
+    }
+    :root[data-theme="light"] header h1,
+    :root[data-theme="light"] section h2,
+    :root[data-theme="light"] .card-title { color: var(--text-main); }
+    :root[data-theme="light"] .btn-primary { color: #ffffff; }
+    :root[data-theme="light"] .toggle-preview { background-color: #e2e8f0; color: #0f172a; }
+    :root[data-theme="light"] .toggle-preview:hover { background-color: #cbd5e1; }
+    .topline {
+      max-width: 1200px;
+      margin: 0 auto 1.5rem auto;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .topline .back { margin: 0; flex: 1; }
+    .theme-btn {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+      /* Fallende Sachen: Geldscheine, Waffen, Rockstar, Phil, Bitcoin */
+    .fall {
+      position: fixed;
+      top: -90px;
+      pointer-events: none;
+      user-select: none;
+      z-index: 2;
+      animation-name: fallen;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      will-change: transform;
+    }
+    .fall img { display: block; width: 100%; height: 100%; }
+    .fall.emo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.5));
+    }
+    @keyframes fallen {
+      0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+      100% { transform: translate3d(60px, 112vh, 0) rotate(var(--dreh, 360deg)); }
+    }
+    @media (prefers-reduced-motion: reduce) { .fall { display: none; } }
+  </style>
 </head>
 <body>
 
-  <p class="back"><a href="hauptseite.html">← Zurück zur Startseite</a></p>
+  <div class="topline">
+    <p class="back"><a href="hauptseite.html">← Zurück zur Startseite</a></p>
+    <button class="theme-btn" id="themeBtn" type="button">🌙 Dunkel</button>
+  </div>
 
   <header>
     <h1 class="italic">🎁 Potenzielle Weihnachtsgeschenke</h1>
@@ -261,8 +332,9 @@
         </div>
         <div class="card-content">
           <h2 class="card-title">GTA VI – Ultimate Edition</h2>
-          <p class="card-desc">Aktuell noch kein günstiges Angebot. Über 50 € lohnt sich der Kauf nicht.</p>
-          <p class="price-line">Eventuell für die Weihnachtsferien?</p>
+          <p class="fav-note">(Eventuell für die Weihnachtsferien?)</p>
+          <p class="card-desc">Aktuell gibt es noch kein günstiges Angebot.</p>
+          <p class="price-line">Über 50 € lohnt sich der Kauf nicht.</p>
           <div class="card-actions">
             <button class="btn toggle-preview" onclick="toggleBlur('img-gta', this)">Verbergen</button>
             <a href="https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=GTA+VI+Ultimate+Edition" target="_blank" rel="noopener" class="btn btn-primary">Zum Preisvergleich</a>
@@ -275,8 +347,9 @@
         </div>
         <div class="card-content">
           <h2 class="card-title">Intel Core i5-14600KF (Tray)</h2>
-          <p class="card-desc">Aktuell noch nicht so günstig. Es lohnt sich, auf einen Black-Friday-Deal zu warten bzw. darauf zu hoffen.</p>
-          <p class="price-line">Muss deutlich unter 200 € liegen, sonst zu teuer!</p>
+          <p class="fav-note">(Muss deutlich unter 200 € liegen, sonst zu teuer!)</p>
+          <p class="card-desc">Aktuell noch nicht so günstig.</p>
+          <p class="price-line">Am besten auf einen Black-Friday-Deal warten bzw. darauf hoffen.</p>
           <div class="card-actions">
             <button class="btn toggle-preview" onclick="toggleBlur('img-intel', this)">Verbergen</button>
             <a href="https://www.idealo.de/preisvergleich/OffersOfProduct/203357444_-core-i5-14600kf-tray-intel.html" target="_blank" rel="noopener" class="btn btn-primary">Zum Preisvergleich</a>
@@ -294,6 +367,58 @@
       img.style.opacity = nowBlurred ? '0.3' : '1';
       btn.textContent = nowBlurred ? 'Anzeigen' : 'Verbergen';
     }
+  </script>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var btn = document.getElementById('themeBtn');
+      function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+      function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+      function apply(mode) {
+        root.dataset.theme = mode;
+        if (btn) btn.textContent = mode === 'light' ? '\u2600\ufe0f Hell' : '\ud83c\udf19 Dunkel';
+        set('theme', mode);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', mode === 'light' ? '#f1f5f9' : '#0f172a');
+      }
+      apply(get('theme') === 'light' ? 'light' : 'dark');
+      if (btn) btn.addEventListener('click', function () {
+        apply(root.dataset.theme === 'light' ? 'dark' : 'light');
+      });
+    })();
+  </script>
+  <script>
+    /* Fallende Geldscheine, Waffen, Rockstar-Logos, Phil Collins und Bitcoins */
+    (function () {
+      var BILDER = ['bilder/phil.png', 'bilder/rockstar.png', 'bilder/bitcoin.png'];
+      var EMOJIS = ['\uD83D\uDCB5', '\uD83D\uDCB6', '\uD83D\uDCB0', '\uD83D\uDD2B', '\uD83D\uDCB8'];
+      var ANZAHL = 28;
+      for (var i = 0; i < ANZAHL; i++) {
+        var el = document.createElement('span');
+        el.className = 'fall';
+        var groesse = 36 + Math.round(Math.random() * 30);   /* 36 bis 66 px */
+        var bild = Math.random() < 0.5;
+        if (bild) {
+          var img = document.createElement('img');
+          img.src = BILDER[i % BILDER.length];
+          img.alt = '';
+          el.appendChild(img);
+        } else {
+          el.className += ' emo';
+          el.textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+          el.style.fontSize = Math.round(groesse * 0.9) + 'px';
+        }
+        var dauer = 11 + Math.random() * 11;
+        el.style.width = groesse + 'px';
+        el.style.height = groesse + 'px';
+        el.style.left = (Math.random() * 100) + 'vw';
+        el.style.opacity = (0.75 + Math.random() * 0.25).toFixed(2);
+        el.style.setProperty('--dreh', (Math.random() < 0.5 ? -1 : 1) * (180 + Math.random() * 540) + 'deg');
+        el.style.animationDuration = dauer + 's';
+        el.style.animationDelay = (-Math.random() * dauer) + 's';
+        document.body.appendChild(el);
+      }
+    })();
   </script>
 </body>
 </html>

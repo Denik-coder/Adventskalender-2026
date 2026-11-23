@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Adventskalender">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="bilder/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="bilder/favicon-512.png">
+  <link rel="apple-touch-icon" href="bilder/apple-touch-icon.png">
   <title>Technik Gadgets – Wunschliste</title>
   <style>
     :root {
@@ -74,7 +83,8 @@
 
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 300px));
+      justify-content: center;
       gap: 1.5rem;
     }
 
@@ -237,11 +247,48 @@
     }
       .btn small { display: block; font-weight: 400; font-size: 0.75rem; opacity: 0.85; margin-top: 2px; }
       .shop-logo { height: 16px; width: auto; vertical-align: middle; margin: 0 2px; border-radius: 2px; }
+      :root[data-theme="light"] {
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent-color: #0284c7;
+      --accent-hover: #0369a1;
+      --border-color: #cbd5e1;
+      --top-color: #b45309;
+    }
+    :root[data-theme="light"] header h1,
+    :root[data-theme="light"] section h2,
+    :root[data-theme="light"] .card-title { color: var(--text-main); }
+    :root[data-theme="light"] .btn-primary { color: #ffffff; }
+    :root[data-theme="light"] .toggle-preview { background-color: #e2e8f0; color: #0f172a; }
+    :root[data-theme="light"] .toggle-preview:hover { background-color: #cbd5e1; }
+    .topline {
+      max-width: 1200px;
+      margin: 0 auto 1.5rem auto;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .topline .back { margin: 0; flex: 1; }
+    .theme-btn {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
-  <p class="back"><a href="hauptseite.html">← Zurück zur Startseite</a></p>
+  <div class="topline">
+    <p class="back"><a href="hauptseite.html">← Zurück zur Startseite</a></p>
+    <button class="theme-btn" id="themeBtn" type="button">🌙 Dunkel</button>
+  </div>
 
   <header>
     <h1>📱 Technik Gadgets</h1>
@@ -365,6 +412,22 @@
         </div>
       </article>
 
+          <article class="card">
+        <div class="img-container">
+          <img id="img-ankerhub" src="bilder/anker-usb-hub.jpg" alt="Anker 7-in-1 USB-C Hub">
+          <span class="discount-badge">-44 %</span>
+          <span class="price-badge">16,71 €</span>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Anker 7-in-1 USB-C Hub (4K@60Hz HDMI)</h3>
+          <p class="card-desc">85 W Power Delivery, USB-A- und USB-C-3.0-Ports, SD- und microSD-Kartenleser. Ohne Netzteil.</p>
+          <p class="price-line">UVP <s>29,99 €</s><span class="savings">Du sparst 13,28 €</span></p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-ankerhub', this)">Verbergen</button>
+            <a href="https://www.amazon.de/dp/B0DXJQT19B/" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-amazon.png" alt="amazon"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
     </main>
   </section>
 
@@ -381,6 +444,25 @@
       img.style.opacity = nowBlurred ? '0.3' : '1';
       btn.textContent = nowBlurred ? 'Anzeigen' : 'Verbergen';
     }
+  </script>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var btn = document.getElementById('themeBtn');
+      function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+      function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+      function apply(mode) {
+        root.dataset.theme = mode;
+        if (btn) btn.textContent = mode === 'light' ? '\u2600\ufe0f Hell' : '\ud83c\udf19 Dunkel';
+        set('theme', mode);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', mode === 'light' ? '#f1f5f9' : '#0f172a');
+      }
+      apply(get('theme') === 'light' ? 'light' : 'dark');
+      if (btn) btn.addEventListener('click', function () {
+        apply(root.dataset.theme === 'light' ? 'dark' : 'light');
+      });
+    })();
   </script>
 </body>
 </html>

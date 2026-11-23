@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="bilder/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="bilder/favicon-512.png">
+  <link rel="apple-touch-icon" href="bilder/apple-touch-icon.png">
+<title>Semesterplan als Widget</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--card2:#253449;--text:#f8fafc;--muted:#94a3b8;
+  --accent:#38bdf8;--accent-text:#0f172a;--border:#334155}
+:root[data-theme="light"]{--bg:#f1f5f9;--card:#fff;--card2:#f1f5f9;--text:#0f172a;--muted:#64748b;
+  --accent:#0284c7;--accent-text:#fff;--border:#cbd5e1}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{background:var(--bg);color:var(--text);padding:1.25rem 1rem 3rem;min-height:100vh}
+.wrap{max-width:820px;margin:0 auto}
+.topbar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1.3rem}
+.topbar h1{font-size:1.5rem;margin-right:auto}
+.btn{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:10px;
+  padding:.5rem .85rem;font-size:.88rem;font-weight:600;cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;gap:.35rem}
+.btn:hover{background:var(--card2)}
+.btn.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.intro{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem;
+  color:var(--muted);line-height:1.6;font-size:.93rem;margin-bottom:1.5rem}
+.intro b{color:var(--text)}
+.step{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.2rem;margin-bottom:.9rem;
+  display:flex;gap:1rem;align-items:flex-start}
+.num{flex:0 0 28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-text);
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem}
+.step h3{font-size:1rem;margin-bottom:.4rem}
+.step p{color:var(--muted);font-size:.9rem;line-height:1.6;margin-bottom:.5rem}
+.step p:last-child{margin-bottom:0}
+kbd{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:1px 6px;
+  font-size:.82rem;font-family:inherit;color:var(--text);white-space:nowrap}
+.params{list-style:none;margin:.5rem 0 0}
+.params li{margin-bottom:.4rem;font-size:.88rem;color:var(--muted)}
+.params code{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:1px 7px;
+  color:var(--accent);font-weight:600;margin-right:.5rem;display:inline-block;min-width:70px;text-align:center}
+details{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.2rem;margin-top:1.2rem}
+summary{cursor:pointer;font-weight:700;font-size:.95rem}
+pre{margin-top:.9rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.9rem;
+  overflow-x:auto;font-size:.72rem;line-height:1.5;max-height:420px}
+pre code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);white-space:pre}
+.ok{color:#10b981;font-weight:700;font-size:.85rem;margin-left:.6rem}
+footer{margin-top:2rem;text-align:center;color:var(--muted);font-size:.8rem}
+footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <h1>Semesterplan als Widget</h1>
+    <a class="btn" href="semesterplaner.html">&larr; Zum Planer</a>
+    <button class="btn" id="themeBtn" type="button">&#127769; Dunkel</button>
+  </div>
+
+  <p class="intro">Die n&auml;chsten Termine und der Klausur-Countdown direkt auf dem Home-Bildschirm vom iPhone oder iPad.
+  Das Widget holt sich die Termine immer frisch von dieser Website: &Auml;nderst du <b>termine.js</b> auf GitHub,
+  ist es beim n&auml;chsten Aktualisieren von selbst im Widget drin. Einmal einrichten dauert etwa 3 Minuten.</p>
+
+  <div class="step"><div class="num">1</div><div>
+    <h3>Scriptable installieren</h3>
+    <p>Lade die kostenlose App <b>Scriptable</b> aus dem App Store. Mit ihr kann man eigene Widgets bauen.</p>
+    <p><a class="btn" href="https://apps.apple.com/de/app/scriptable/id1405459188" target="_blank" rel="noopener">Scriptable im App Store</a></p>
+  </div></div>
+
+  <div class="step"><div class="num">2</div><div>
+    <h3>Skript kopieren</h3>
+    <p>&Ouml;ffne diese Seite auf dem iPhone oder iPad in Safari und tippe auf <kbd>Skript kopieren</kbd>.</p>
+    <p><button class="btn primary" id="copyBtn" type="button">Skript kopieren</button>
+       <a class="btn" href="semesterplan-widget.js" download>Als Datei laden</a>
+       <span class="ok" id="copyOk" hidden>Kopiert!</span></p>
+  </div></div>
+
+  <div class="step"><div class="num">3</div><div>
+    <h3>In Scriptable einf&uuml;gen</h3>
+    <p>&Ouml;ffne Scriptable und tippe oben rechts auf <kbd>+</kbd>. Tippe in das leere Feld, halte kurz gedr&uuml;ckt und w&auml;hle <kbd>Einf&uuml;gen</kbd>.</p>
+    <p>Tippe oben auf den Namen (&bdquo;Untitled Script&ldquo;) und nenne das Skript <b>Semesterplan</b>. Dann oben links auf <kbd>Fertig</kbd>.</p>
+    <p>Zum Ausprobieren kannst du unten rechts auf <kbd>&#9654;</kbd> tippen. Dann zeigt Scriptable eine Vorschau.</p>
+  </div></div>
+
+  <div class="step"><div class="num">4</div><div>
+    <h3>Widget auf den Home-Bildschirm legen</h3>
+    <p>Halte auf dem Home-Bildschirm einen Finger auf eine freie Stelle, bis die Apps wackeln. Tippe oben links auf
+       <kbd>Bearbeiten</kbd> und dann auf <kbd>Widget hinzuf&uuml;gen</kbd> (bei &auml;lteren Versionen auf das <kbd>+</kbd>).</p>
+    <p>Suche nach <b>Scriptable</b>, wische zur gew&uuml;nschten Gr&ouml;&szlig;e (klein, mittel oder gro&szlig;)
+       und tippe auf <kbd>Widget hinzuf&uuml;gen</kbd>.</p>
+  </div></div>
+
+  <div class="step"><div class="num">5</div><div>
+    <h3>Skript ausw&auml;hlen</h3>
+    <p>Das Widget zeigt erst &bdquo;Select script in widget configurator&ldquo;. Tippe es an (w&auml;hrend die Apps noch wackeln)
+       oder halte es gedr&uuml;ckt und w&auml;hle <kbd>Widget bearbeiten</kbd>. Bei <b>Script</b> w&auml;hlst du <b>Semesterplan</b>.
+       Fertig: Tippe daneben, dann erscheinen deine Termine.</p>
+    <p>Bei <b>When Interacting</b> kannst du alles so lassen. Ein Tipp aufs Widget &ouml;ffnet den Semesterplaner.</p>
+  </div></div>
+
+  <div class="step"><div class="num">6</div><div>
+    <h3>Optional: Was das Widget zeigen soll</h3>
+    <p>Im selben Men&uuml; gibt es das Feld <b>Parameter</b>. Leer lassen passt meistens. Sonst eins dieser W&ouml;rter eintragen:</p>
+    <ul class="params">
+      <li><code>klausur</code> nur der Countdown bis zur n&auml;chsten Klausur</li>
+      <li><code>termine</code> nur die n&auml;chsten Termine, ohne Countdown</li>
+      <li><code>heute</code> nur Termine von heute und morgen</li>
+    </ul>
+    <p style="margin-top:.7rem">Du kannst mehrere Widgets anlegen, zum Beispiel ein gro&szlig;es mit Terminen und ein kleines mit
+      <code style="background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:1px 7px;color:var(--accent)">klausur</code>.</p>
+  </div></div>
+
+  <p class="intro" style="margin-top:1.5rem"><b>Wie oft aktualisiert es sich?</b> Das entscheidet das Ger&auml;t selbst,
+  meist alle 15 bis 30 Minuten. Neue oder ge&auml;nderte Termine auf GitHub sind also nach sp&auml;testens etwa einer halben
+  Stunde im Widget. Ohne Internet zeigt es den zuletzt geladenen Stand und &bdquo;offline&ldquo;.</p>
+
+  <details>
+    <summary>Skript ansehen</summary>
+    <pre><code id="code">// Semesterplan-Widget für Scriptable (iPhone und iPad)
+// Lädt die Termine bei jeder Aktualisierung neu von der Website.
+// Änderst du termine.js auf GitHub, zeigt das Widget es beim nächsten Neuladen von selbst an.
+//
+// Parameter im Widget (lange drücken -&gt; Widget bearbeiten -&gt; Parameter), optional:
+//   leer      -&gt; nächste Termine (bei klein: nächster Termin + Klausur-Countdown)
+//   klausur   -&gt; nur Klausur-Countdown
+//   termine   -&gt; nur Termine, ohne Countdown
+//   heute     -&gt; nur heute und morgen
+
+const SITE  = "https://denik-coder.github.io/Adventskalender-2026/";
+const DATA  = SITE + "termine.js";
+const CACHE = "semesterplan-termine.json";
+
+const HUE = {
+  "Analysis &amp; Lineare Algebra": 220, "Logik &amp; Algebra": 255, "BWL: Einführung": 140, "BWL: Marketing": 168,
+  "Grundlagen der IT": 282, "Einführung in die Programmierung": 335, "Einführung in die Wirtschaftsinformatik": 192,
+  "Vertrags- und Schuldrecht": 105, "Wissenschaftliches Arbeiten": 312, "Präsentations- &amp; Kommunikationskompetenz": 68
+};
+
+const fm = FileManager.local();
+const cachePfad = fm.joinPath(fm.cacheDirectory(), CACHE);
+
+async function ladeTermine() {
+  try {
+    const req = new Request(DATA);
+    req.timeoutInterval = 15;
+    const text = await req.loadString();
+    const a = text.indexOf("["), b = text.lastIndexOf("]");
+    if (a &lt; 0 || b &lt; a) throw new Error("Format");
+    const daten = JSON.parse(text.slice(a, b + 1));
+    if (!Array.isArray(daten) || !daten.length) throw new Error("leer");
+    fm.writeString(cachePfad, JSON.stringify(daten));
+    return { daten: daten, offline: false };
+  } catch (e) {
+    if (fm.fileExists(cachePfad)) {
+      try { return { daten: JSON.parse(fm.readString(cachePfad)), offline: true }; } catch (e2) {}
+    }
+    return { daten: [], offline: true };
+  }
+}
+
+const pad = n =&gt; String(n).padStart(2, "0");
+const keyOf = d =&gt; d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+function zeitpunkt(t, feld) {
+  const p = t.datum.split("-"), u = (t[feld] || "00:00").split(":");
+  return new Date(+p[0], +p[1] - 1, +p[2], +u[0], +u[1]);
+}
+function farbe(t) {
+  if (t.art === "pruefung") return new Color("#ef4444");
+  if (t.art === "sonstiges") return new Color("#94a3b8");
+  let h = HUE[t.titel];
+  if (h == null) { h = 7; for (const c of t.titel) h = (h * 31 + c.charCodeAt(0)) &gt;&gt;&gt; 0; h = h % 360; }
+  return Color.dynamic(hsl(h, 0.55, 0.42), hsl(h, 0.70, 0.62));
+}
+function hsl(h, s, l) {
+  const f = n =&gt; {
+    const k = (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+    const v = l - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)));
+    return Math.round(v * 255);
+  };
+  const hex = n =&gt; pad(n.toString(16));
+  return new Color("#" + hex(f(0)) + hex(f(8)) + hex(f(4)));
+}
+function tagLabel(d) {
+  const heute = new Date(), morgen = new Date(); morgen.setDate(morgen.getDate() + 1);
+  if (keyOf(d) === keyOf(heute)) return "HEUTE";
+  if (keyOf(d) === keyOf(morgen)) return "MORGEN";
+  const wd = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][d.getDay()];
+  return wd + ", " + d.getDate() + "." + (d.getMonth() + 1) + ".";
+}
+function restText(ziel) {
+  const ms = ziel - new Date();
+  if (ms &lt;= 0) return "jetzt";
+  const tage = Math.floor(ms / 864e5);
+  if (tage &gt;= 1) return "noch " + tage + (tage === 1 ? " Tag" : " Tage");
+  const std = Math.floor(ms / 36e5), min = Math.floor((ms % 36e5) / 6e4);
+  return std &gt;= 1 ? "in " + std + " h " + min + " min" : "in " + min + " min";
+}
+
+const FARBE_TEXT  = Color.dynamic(new Color("#0f172a"), new Color("#f8fafc"));
+const FARBE_GRAU  = Color.dynamic(new Color("#64748b"), new Color("#94a3b8"));
+const FARBE_BG    = Color.dynamic(new Color("#ffffff"), new Color("#0f172a"));
+
+function zeileTermin(stack, t, klein) {
+  const row = stack.addStack();
+  row.layoutHorizontally();
+  row.centerAlignContent();
+
+  const strich = row.addStack();
+  strich.size = new Size(3, klein ? 22 : 26);
+  strich.cornerRadius = 2;
+  strich.backgroundColor = farbe(t);
+  row.addSpacer(6);
+
+  const txt = row.addStack();
+  txt.layoutVertically();
+  const titel = txt.addText(t.titel);
+  titel.font = Font.semiboldSystemFont(klein ? 11 : 12);
+  titel.textColor = FARBE_TEXT;
+  titel.lineLimit = 1;
+
+  const info = t.von + "–" + t.bis + (t.raum ? "  " + t.raum : "");
+  const sub = txt.addText(info);
+  sub.font = Font.systemFont(klein ? 9 : 10);
+  sub.textColor = FARBE_GRAU;
+  sub.lineLimit = 1;
+}
+
+async function baue() {
+  const { daten, offline } = await ladeTermine();
+  const w = new ListWidget();
+  w.backgroundColor = FARBE_BG;
+  w.setPadding(12, 13, 12, 13);
+  w.url = SITE + "semesterplaner.html";
+
+  const familie = config.runsInWidget ? config.widgetFamily : "medium";
+  const klein = familie === "small";
+  const param = (args.widgetParameter || "").trim().toLowerCase();
+
+  if (!daten.length) {
+    const t = w.addText("Keine Termine geladen");
+    t.font = Font.semiboldSystemFont(13); t.textColor = FARBE_TEXT;
+    const s = w.addText("Prüfe die Internetverbindung.");
+    s.font = Font.systemFont(10); s.textColor = FARBE_GRAU;
+    return w;
+  }
+
+  const jetzt = new Date();
+  let kommend = daten
+    .filter(t =&gt; t &amp;&amp; t.datum &amp;&amp; t.von &amp;&amp; t.bis &amp;&amp; t.titel)
+    .map(t =&gt; ({ t: t, start: zeitpunkt(t, "von"), ende: zeitpunkt(t, "bis") }))
+    .filter(x =&gt; x.ende &gt; jetzt)
+    .sort((a, b) =&gt; a.start - b.start);
+
+  if (param === "heute") {
+    const grenze = new Date(); grenze.setDate(grenze.getDate() + 2); grenze.setHours(0, 0, 0, 0);
+    kommend = kommend.filter(x =&gt; x.start &lt; grenze);
+  }
+
+  const klausur = daten
+    .map(t =&gt; ({ t: t, start: zeitpunkt(t, "von") }))
+    .filter(x =&gt; x.t.art === "pruefung" &amp;&amp; x.start &gt; jetzt)
+    .sort((a, b) =&gt; a.start - b.start)[0];
+
+  // Kopfzeile
+  const kopf = w.addStack();
+  kopf.layoutHorizontally();
+  kopf.centerAlignContent();
+  const sym = kopf.addImage(SFSymbol.named("calendar").image);
+  sym.imageSize = new Size(12, 12);
+  sym.tintColor = new Color("#38bdf8");
+  kopf.addSpacer(5);
+  const titel = kopf.addText(offline ? "Semesterplan · offline" : "Semesterplan");
+  titel.font = Font.semiboldSystemFont(11);
+  titel.textColor = new Color("#38bdf8");
+  kopf.addSpacer();
+
+  if (!klein &amp;&amp; klausur &amp;&amp; param !== "termine") {
+    const st = kopf.addStack();
+    st.layoutVertically();
+    const a = st.addText(restText(klausur.start));
+    a.font = Font.boldSystemFont(11);
+    a.textColor = new Color("#ef4444");
+    a.rightAlignText();
+    const b = st.addText(klausur.t.titel);
+    b.font = Font.systemFont(9);
+    b.textColor = FARBE_GRAU;
+    b.lineLimit = 1;
+    b.rightAlignText();
+  }
+  w.addSpacer(8);
+
+  // Nur Klausur-Countdown
+  if (param === "klausur") {
+    if (!klausur) {
+      const t = w.addText("Keine Klausur mehr"); t.font = Font.semiboldSystemFont(13); t.textColor = FARBE_TEXT;
+      return w;
+    }
+    const a = w.addText(restText(klausur.start));
+    a.font = Font.boldSystemFont(klein ? 18 : 24);
+    a.textColor = new Color("#ef4444");
+    w.addSpacer(3);
+    const b = w.addText(klausur.t.titel);
+    b.font = Font.semiboldSystemFont(klein ? 11 : 13);
+    b.textColor = FARBE_TEXT; b.lineLimit = 2;
+    const c = w.addText(tagLabel(klausur.start) + "  " + klausur.t.von);
+    c.font = Font.systemFont(10); c.textColor = FARBE_GRAU;
+    return w;
+  }
+
+  if (!kommend.length) {
+    const t = w.addText(param === "heute" ? "Heute und morgen nichts" : "Keine Termine mehr");
+    t.font = Font.semiboldSystemFont(13); t.textColor = FARBE_TEXT;
+    return w;
+  }
+
+  const maxZeilen = klein ? 2 : familie === "medium" ? 3 : 7;
+  let letzterTag = null, gezeigt = 0;
+
+  for (const x of kommend) {
+    if (gezeigt &gt;= maxZeilen) break;
+    const tag = keyOf(x.start);
+    if (tag !== letzterTag &amp;&amp; !klein) {
+      if (letzterTag !== null) w.addSpacer(6);
+      const l = w.addText(tagLabel(x.start));
+      l.font = Font.boldSystemFont(9);
+      l.textColor = FARBE_GRAU;
+      w.addSpacer(3);
+      letzterTag = tag;
+    }
+    zeileTermin(w, x.t, klein);
+    gezeigt++;
+    if (gezeigt &lt; maxZeilen) w.addSpacer(5);
+  }
+
+  if (klein &amp;&amp; klausur) {
+    w.addSpacer(5);
+    const a = w.addText(restText(klausur.start) + " · " + klausur.t.titel);
+    a.font = Font.semiboldSystemFont(9);
+    a.textColor = new Color("#ef4444");
+    a.lineLimit = 1;
+  }
+
+  w.addSpacer();
+  return w;
+}
+
+const widget = await baue();
+if (config.runsInWidget) Script.setWidget(widget);
+else await widget.presentMedium();
+Script.complete();
+</code></pre>
+  </details>
+
+  <footer><a href="semesterplaner.html">Semesterplaner</a> &middot; <a href="hauptseite.html">Adventskalender</a></footer>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement,btn=document.getElementById("themeBtn");
+  function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function apply(m){root.dataset.theme=m;btn.textContent=m==="light"?"\u2600\uFE0F Hell":"\uD83C\uDF19 Dunkel";set("theme",m);
+    var mt=document.querySelector('meta[name="theme-color"]');if(mt)mt.setAttribute("content",m==="light"?"#f1f5f9":"#0f172a");}
+  apply(get("theme")==="light"?"light":"dark");
+  btn.addEventListener("click",function(){apply(root.dataset.theme==="light"?"dark":"light")});
+})();
+
+document.getElementById("copyBtn").addEventListener("click", function(){
+  var txt = document.getElementById("code").textContent;
+  var ok = document.getElementById("copyOk");
+  function fertig(){ ok.hidden=false; setTimeout(function(){ok.hidden=true;},2500); }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(fertig, alt);
+  } else { alt(); }
+  function alt(){
+    var ta=document.createElement("textarea");
+    ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try{ document.execCommand("copy"); fertig(); }catch(e){ alert("Bitte das Skript unten markieren und von Hand kopieren."); }
+    document.body.removeChild(ta);
+  }
+});
+</script>
+</body>
+</html>

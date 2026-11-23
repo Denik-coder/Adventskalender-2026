@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Adventskalender">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="bilder/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="bilder/favicon-512.png">
+  <link rel="apple-touch-icon" href="bilder/apple-touch-icon.png">
   <title>Lifestyle (Mode) – Wunschliste</title>
   <style>
     :root {
@@ -74,7 +83,8 @@
 
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 300px));
+      justify-content: center;
       gap: 1.5rem;
     }
 
@@ -243,18 +253,125 @@
     .shop-logo { height: 16px; width: auto; vertical-align: middle; margin: 0 2px; border-radius: 2px; }
     .img-container img.cover { object-fit: cover; }
     .empty { color: var(--text-muted); text-align: center; margin: 2rem auto; max-width: 600px; }
-</style>
+    :root[data-theme="light"] {
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent-color: #0284c7;
+      --accent-hover: #0369a1;
+      --border-color: #cbd5e1;
+      --top-color: #b45309;
+    }
+    :root[data-theme="light"] header h1,
+    :root[data-theme="light"] section h2,
+    :root[data-theme="light"] .card-title { color: var(--text-main); }
+    :root[data-theme="light"] .btn-primary { color: #ffffff; }
+    :root[data-theme="light"] .toggle-preview { background-color: #e2e8f0; color: #0f172a; }
+    :root[data-theme="light"] .toggle-preview:hover { background-color: #cbd5e1; }
+    .topline {
+      max-width: 1200px;
+      margin: 0 auto 1.5rem auto;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .topline .back { margin: 0; flex: 1; }
+    .theme-btn {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+      .extra {
+      background: rgba(225, 29, 72, 0.12);
+      border: 1px solid var(--discount-color);
+      border-radius: 8px;
+      padding: 0.55rem 0.7rem;
+      margin-bottom: 0.75rem;
+    }
+    .extra b { color: var(--discount-color); font-size: 0.86rem; display: block; }
+    .extra span { color: var(--text-muted); font-size: 0.78rem; line-height: 1.4; display: block; margin-top: 0.15rem; }
+    .versand {
+      max-width: 1200px;
+      margin: 0 auto 1.5rem auto;
+      background: var(--card-bg);
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 0.9rem 1.1rem;
+      color: var(--text-muted);
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+    .versand b { color: var(--text-main); }
+      .ottoplus {
+      display: block;
+      margin-top: 0.5rem;
+      color: var(--top-color);
+      font-style: italic;
+      font-weight: 600;
+    }
+  </style>
 </head>
 <body>
 
-  <p class="back"><a href="hauptseite.html">← Zurück zur Startseite</a></p>
+  <div class="topline">
+    <p class="back"><a href="hauptseite.html">← Zurück zur Startseite</a></p>
+    <button class="theme-btn" id="themeBtn" type="button">🌙 Dunkel</button>
+  </div>
 
   <header>
     <h1>👗 Lifestyle (Mode)</h1>
     <p>Meine Wunschliste: Mode-Ideen für mein Zimmer und mich.</p>
   </header>
 
-  <p class="empty">Hier kommen bald die ersten Objekte rein.</p>
+  <p class="versand">Beide Artikel zusammen kosten <b>61,58 €</b>. Ab 59,95 € ist der Versand bei Otto <b>gratis</b> — einzeln kommen jeweils 4,95 € Versand dazu.<br><b>Wichtig:</b> Die 20 % Extra sind eine zeitlich begrenzte Aktion (Stand 23.11.2026). Läuft sie ab, steigen die Preise wieder.<span class="ottoplus">Mit OTTO UP Plus (9,90 € im Jahr) entfallen die Paketversandkosten ganz, unabhängig vom Bestellwert.</span></p>
+  <main class="grid-container">
+      <article class="card">
+        <div class="img-container">
+          <img id="img-leinenhose" src="bilder/blend-leinenhose.jpg" alt="Blend Leinenhose BHABAN">
+          <span class="discount-badge">-14 % + 20 %</span>
+          <span class="price-badge">34,39 €</span>
+        </div>
+        <div class="card-content">
+          <h2 class="card-title">Blend Leinenhose BHABAN</h2>
+          <p class="card-desc">Schlupfhose mit elastischem Bund und Kordel, sommerlich, mit hohem Baumwollanteil. Farbe Black Beauty, Größe M.</p>
+          <div class="extra">
+            <b>20 % Extra sind im Preis schon drin</b>
+            <span>Aktion „20 % Extra auf Mode-Highlights“ — nur für kurze Zeit. Danach kostet der Artikel wieder mehr.</span>
+          </div>
+          <p class="price-line">UVP <s>49,95 €</s><span class="savings">Du sparst 15,56 €</span></p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-leinenhose', this)">Verbergen</button>
+            <a href="https://www.otto.de/p/blend-leinenhose-bhaban-linen-mix-gemuetliche-leinenmix-hose-mit-elastischem-bund-und-kordel-C2025150557/?variationId=2025150559" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-otto.png" alt="Otto"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+      <article class="card">
+        <div class="img-container">
+          <img id="img-blendhemd" src="bilder/blend-hemd.jpg" alt="Blend Kurzarmhemd BHABAN">
+          <span class="discount-badge">-15 % + 20 %</span>
+          <span class="price-badge">27,19 €</span>
+        </div>
+        <div class="card-content">
+          <h2 class="card-title">Blend Kurzarmhemd BHABAN</h2>
+          <p class="card-desc">Aus Baumwollmischung mit Leinen, Regular Fit, pflegeleicht. Farbe Black Beauty, Größe M.</p>
+          <div class="extra">
+            <b>20 % Extra sind im Preis schon drin</b>
+            <span>Aktion „20 % Extra auf Mode-Highlights“ — nur für kurze Zeit. Danach kostet der Artikel wieder mehr.</span>
+          </div>
+          <p class="price-line">UVP <s>39,95 €</s><span class="savings">Du sparst 12,76 €</span></p>
+          <div class="card-actions">
+            <button class="btn toggle-preview" onclick="toggleBlur('img-blendhemd', this)">Verbergen</button>
+            <a href="https://www.otto.de/p/blend-kurzarmhemd-bhaban-shirt-pp-noos-aus-baumwollmischung-mit-leinen-regular-fit-pflegeleicht-C2025150057/?variationId=2025150059" target="_blank" rel="noopener" class="btn btn-primary">Zum Shop <img class="shop-logo" src="bilder/logo-otto.png" alt="Otto"> <small>(günstigstes Angebot)</small></a>
+          </div>
+        </div>
+      </article>
+  </main>
 
   <script>
     function toggleBlur(imageId, btn) {
@@ -265,6 +382,25 @@
       img.style.opacity = nowBlurred ? '0.3' : '1';
       btn.textContent = nowBlurred ? 'Anzeigen' : 'Verbergen';
     }
+  </script>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var btn = document.getElementById('themeBtn');
+      function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+      function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+      function apply(mode) {
+        root.dataset.theme = mode;
+        if (btn) btn.textContent = mode === 'light' ? '\u2600\ufe0f Hell' : '\ud83c\udf19 Dunkel';
+        set('theme', mode);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', mode === 'light' ? '#f1f5f9' : '#0f172a');
+      }
+      apply(get('theme') === 'light' ? 'light' : 'dark');
+      if (btn) btn.addEventListener('click', function () {
+        apply(root.dataset.theme === 'light' ? 'dark' : 'light');
+      });
+    })();
   </script>
 </body>
 </html>

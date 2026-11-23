@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Semesterplan">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f172a">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="bilder/favicon-32.png">
+<link rel="icon" type="image/png" sizes="512x512" href="bilder/favicon-512.png">
+<link rel="apple-touch-icon" href="bilder/apple-touch-icon.png">
+<title>1. Semester WIF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f172a; --card:#1e293b; --card2:#253449; --text:#f8fafc; --muted:#94a3b8;
+  --accent:#38bdf8; --accent-text:#0f172a; --border:#334155;
+  --line:rgba(148,163,184,.18); --today:rgba(56,189,248,.08); --danger:#ef4444;
+  --marker:#fde047; --barh:64px;
+}
+:root[data-theme="light"]{
+  --bg:#f1f5f9; --card:#fff; --card2:#f1f5f9; --text:#0f172a; --muted:#64748b;
+  --accent:#0284c7; --accent-text:#fff; --border:#cbd5e1;
+  --line:rgba(100,116,139,.22); --today:rgba(2,132,199,.07); --danger:#dc2626;
+  --marker:#fde047;
+}
+*{box-sizing:border-box;margin:0;padding:0;
+  font-family:"Geist",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:1.1rem 1rem 3rem}
+.wrap{max-width:1040px;margin:0 auto;position:relative;z-index:1}
+
+/* ---------- Nationalparks als Seitenstreifen ---------- */
+.park{position:fixed;top:0;bottom:0;width:calc((100vw - 1070px)/2 - 18px);max-width:370px;
+  display:none;z-index:0;border-radius:18px;overflow:hidden}
+.park.l{left:14px}.park.r{right:14px}
+.park img{width:100%;height:100%;object-fit:cover;display:block}
+.park::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(15,23,42,.30),rgba(15,23,42,.10) 35%,rgba(15,23,42,.72))}
+:root[data-theme="light"] .park::after{
+  background:linear-gradient(to bottom,rgba(15,23,42,.18),rgba(15,23,42,.05) 35%,rgba(15,23,42,.62))}
+.park .cap{position:absolute;left:0;right:0;bottom:30px;text-align:center;z-index:2;
+  font-family:"Great Vibes",cursive;font-size:2.5rem;line-height:1.1}
+.park.l .cap{color:#facc15;text-shadow:0 2px 16px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8)}
+.park.r .cap{color:#14532d;text-shadow:0 0 14px rgba(255,255,255,.95),0 0 26px rgba(255,255,255,.7),0 2px 5px rgba(0,0,0,.45)}
+@media(min-width:1300px){.park{display:block}}
+
+/* ---------- Kopf ---------- */
+.headrow{display:block;margin-bottom:.5rem}
+.headrow h1{font-size:1.9rem;font-weight:800;letter-spacing:-.01em;padding-top:.35rem}
+.topbar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.9rem}
+.headrow h1 .mark{
+  background:linear-gradient(transparent 4%, var(--marker) 4%, var(--marker) 93%, transparent 93%);
+  padding:.05em .2em .1em;border-radius:3px;color:#0f172a;
+  text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;
+  text-decoration-color:#0f172a;
+}
+:root[data-theme="dark"] .headrow h1 .mark,:root:not([data-theme="light"]) .headrow h1 .mark{color:#0f172a}
+.btn{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:10px;
+  padding:.45rem .8rem;font-size:.86rem;font-weight:600;cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;gap:.35rem;white-space:nowrap}
+.btn:hover{background:var(--card2)}
+.btn.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+
+/* ---------- Klausur-Leiste, laeuft immer mit ---------- */
+#klausurbar{position:sticky;top:0;z-index:30;margin:0 -0.25rem .9rem;
+  background:var(--danger);border-radius:12px;padding:.55rem .8rem;
+  display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;
+  box-shadow:0 6px 18px rgba(239,68,68,.35)}
+#klausurbar .kb-title{font-weight:800;font-size:.92rem;color:#fff;letter-spacing:.02em;white-space:nowrap}
+#klausurbar .kb{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);
+  border-radius:999px;padding:.25rem .7rem;color:#fff;font-size:.85rem;font-weight:700;white-space:nowrap}
+#klausurbar .kb b{font-variant-numeric:tabular-nums}
+#klausurbar .kb .nm{font-weight:600;opacity:.92}
+#klausurbar.done{background:#10b981;box-shadow:0 6px 18px rgba(16,185,129,.3)}
+
+.tabs{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.5rem;margin-bottom:1.2rem;-webkit-overflow-scrolling:touch}
+.tab{flex:0 0 auto;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:999px;
+  padding:.5rem 1rem;font-size:.92rem;font-weight:600;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.panel{display:none}.panel.active{display:block}
+
+h2.sec{font-size:1.1rem;margin:0 0 .9rem}
+.hint{color:var(--muted);font-size:.9rem;line-height:1.55;background:var(--card);
+  border:1px dashed var(--border);border-radius:12px;padding:1rem}
+.note{color:var(--muted);font-size:.78rem;line-height:1.5;margin-top:1rem}
+.note a{color:var(--accent)}
+
+/* ---------- Woche ---------- */
+.weeknav{display:flex;align-items:center;gap:.5rem;margin-bottom:.8rem;flex-wrap:wrap}
+.weeknav .label{font-weight:700;font-size:.95rem;margin-right:auto}
+.week-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.week{display:grid;gap:0;min-width:620px}
+.week .head{position:sticky;top:0;z-index:3;background:var(--bg);padding:.45rem .3rem;text-align:center;
+  font-weight:700;font-size:.85rem;border-bottom:1px solid var(--border)}
+.week .head.today{color:var(--accent)}
+.week .head small{display:block;font-weight:400;font-size:.74rem;color:var(--muted)}
+.timecol{position:relative;border-right:1px solid var(--border)}
+.timecol span{position:absolute;right:6px;transform:translateY(-50%);font-size:.7rem;color:var(--muted)}
+.daycol{position:relative;border-right:1px solid var(--border);
+  background-image:repeating-linear-gradient(to bottom,var(--line) 0,var(--line) 1px,transparent 1px,transparent var(--hh));
+  background-position:0 var(--pad)}
+.daycol.today{background-color:var(--today)}
+.ev{position:absolute;border-radius:8px;padding:4px 6px;overflow:hidden;background:var(--card);
+  border-left:4px solid var(--c,#38bdf8);box-shadow:0 2px 6px rgba(0,0,0,.18);font-size:.75rem;line-height:1.25}
+.ev b{display:block;font-size:.78rem;margin-bottom:1px}
+.ev .m{color:var(--muted);font-size:.68rem;display:block}
+.ev.pruefung{border:2px solid var(--danger);border-left-width:4px}
+.ev.tutorium{border-style:dashed;border-width:1px 1px 1px 4px;
+  border-color:var(--border) var(--border) var(--border) var(--c,#38bdf8)}
+.nowline{position:absolute;left:0;right:0;height:2px;background:var(--danger);z-index:2}
+.nowline::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--danger)}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;margin-top:.9rem;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:.35rem;vertical-align:middle}
+
+/* ---------- Liste ---------- */
+.daygroup{margin-bottom:1.4rem}
+.daygroup h3{font-size:.98rem;margin-bottom:.55rem;color:var(--accent)}
+.row{display:flex;align-items:flex-start;gap:.9rem;background:var(--card);border:1px solid var(--border);
+  border-left:4px solid var(--c,#38bdf8);border-radius:10px;padding:.7rem .85rem;margin-bottom:.45rem}
+.row.pruefung{border-color:var(--danger)}
+.row .t{font-variant-numeric:tabular-nums;font-weight:700;font-size:.85rem;white-space:nowrap;min-width:92px}
+.row .i{flex:1;min-width:0}
+.row .i b{display:block;font-size:.93rem}
+.row .i span{color:var(--muted);font-size:.8rem}
+.badge{display:inline-block;font-size:.66rem;font-weight:700;border-radius:999px;padding:1px 7px;margin-left:.4rem;
+  border:1px solid var(--border);color:var(--muted);vertical-align:middle}
+.badge.p{color:var(--danger);border-color:var(--danger)}
+
+/* ---------- Countdown ---------- */
+.cdgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:1rem}
+.cdcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem;text-align:center}
+.cdcard.p{border-color:var(--danger)}
+.cdcard h3{font-size:.92rem;color:var(--muted);font-weight:600;margin-bottom:.5rem}
+.cdcard .big{font-size:1.65rem;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent)}
+.cdcard.p .big{color:var(--danger)}
+.cdcard .sub{font-size:.78rem;color:var(--muted);margin-top:.35rem}
+.bar{height:14px;background:var(--card);border:1px solid var(--border);border-radius:999px;overflow:hidden}
+.bar>div{height:100%;background:var(--accent);width:0}
+.barlab{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-top:.35rem}
+
+/* ---------- Mensa ---------- */
+.ersatz{background:rgba(250,204,21,.14);border:1px solid #facc15;border-radius:10px;
+  padding:.6rem .85rem;font-size:.82rem;line-height:1.5;margin-bottom:1rem}
+.ersatz b{color:#facc15}
+.ersatz a{color:var(--accent)}
+.mdays{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.5rem;margin-bottom:1rem}
+.mdays .btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}
+.dish{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;
+  display:flex;flex-direction:column}
+.dish .ph{position:relative;height:200px;background:var(--card2);display:flex;align-items:center;
+  justify-content:center;font-size:2.4rem}
+.dish .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.pill{position:absolute;border-radius:999px;font-size:.7rem;font-weight:700;padding:3px 9px;
+  background:rgba(15,23,42,.78);color:#f8fafc;backdrop-filter:blur(3px)}
+.pill.cat{top:10px;left:10px}
+.pill.price{top:10px;right:10px}
+.pill.sym{bottom:10px;left:10px;font-weight:600;opacity:.9}
+.dish .b{padding:.85rem;display:flex;flex-direction:column;flex:1}
+.dish h4{font-size:.95rem;margin-bottom:.3rem;line-height:1.35}
+.dish .ex{color:var(--muted);font-size:.8rem;margin-bottom:.4rem}
+.dish .chef{color:var(--accent);font-size:.8rem;text-decoration:underline;margin-bottom:.5rem}
+.dish .pr2{margin-top:auto;color:var(--muted);font-size:.76rem}
+.sides{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:.6rem;margin-top:.6rem}
+.side{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:.5rem .7rem;
+  display:flex;align-items:center;gap:.7rem}
+.side .th{width:46px;height:46px;border-radius:8px;object-fit:cover;background:var(--card2);flex:0 0 46px}
+.side .sb{flex:1;min-width:0}
+.side .sb .cat{display:block;font-size:.68rem;font-weight:700;color:var(--muted)}
+.side .sb b{font-size:.84rem;font-weight:600;line-height:1.3}
+.side .p{font-weight:700;font-size:.84rem;white-space:nowrap}
+
+footer{margin-top:2.5rem;text-align:center;color:var(--muted);font-size:.78rem}
+footer a{color:var(--accent)}
+@media(max-width:620px){
+  .topbar h1{font-size:1.45rem;width:100%}
+  #klausurbar{gap:.45rem;padding:.5rem .6rem}
+  #klausurbar .kb{font-size:.78rem;padding:.2rem .55rem}
+}
+
+/* ---------- Uhr und Matrix-Wuerfel ---------- */
+.clockbox{--uhr:134px;--wrf:124px;display:flex;flex-direction:column;align-items:center;gap:.45rem}
+@media(min-width:861px){
+  .wrap{padding-right:245px}
+  .clockbox{position:absolute;top:0;right:0;width:230px;z-index:5}
+}
+.analog{width:var(--uhr);height:var(--uhr);display:block}
+.analog .zb{fill:var(--card);stroke:var(--border);stroke-width:2}
+.analog .ticks line{stroke:var(--muted);stroke-width:2;stroke-linecap:round}
+.analog .ticks line.gross{stroke:var(--text);stroke-width:3}
+.analog .hz{stroke-linecap:round}
+.analog .std{stroke:var(--text);stroke-width:5}
+.analog .min{stroke:var(--text);stroke-width:3.2}
+.analog .sek{stroke:#ef4444;stroke-width:1.6}
+.analog .mitte{fill:#ef4444}
+
+.scene{width:calc(var(--wrf) * 1.55);height:calc(var(--wrf) * 1.55);perspective:620px;
+  display:flex;align-items:center;justify-content:center}
+.cube{position:relative;width:var(--wrf);height:var(--wrf);transform-style:preserve-3d;
+  animation:drehen 16s linear infinite}
+@keyframes drehen{
+  0%  {transform:rotateX(-18deg) rotateY(0deg)}
+  100%{transform:rotateX(-18deg) rotateY(360deg)}
+}
+.face{position:absolute;inset:0;overflow:hidden;
+  background:radial-gradient(circle at 50% 35%, rgba(0,80,24,.92), rgba(0,18,6,.95));
+  border:1px solid rgba(34,255,106,.55);
+  box-shadow:inset 0 0 22px rgba(34,255,106,.38), 0 0 18px rgba(34,255,106,.28);
+  display:flex;align-items:center;justify-content:center}
+.f-front {transform:translateZ(calc(var(--wrf) / 2))}
+.f-back  {transform:rotateY(180deg) translateZ(calc(var(--wrf) / 2))}
+.f-right {transform:rotateY(90deg)  translateZ(calc(var(--wrf) / 2))}
+.f-left  {transform:rotateY(-90deg) translateZ(calc(var(--wrf) / 2))}
+.f-top   {transform:rotateX(90deg)  translateZ(calc(var(--wrf) / 2))}
+.f-bottom{transform:rotateX(-90deg) translateZ(calc(var(--wrf) / 2))}
+.zeit{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:calc(var(--wrf) * .152);font-weight:700;letter-spacing:.02em;color:#4ade80;
+  text-shadow:0 0 6px #22ff6a,0 0 16px rgba(34,255,106,.75);z-index:2;position:relative}
+.regen{position:absolute;top:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:calc(var(--wrf) * .115);line-height:1.12;color:#22ff6a;white-space:pre;text-align:center;
+  text-shadow:0 0 6px rgba(34,255,106,.9);opacity:.85;
+  animation:matrixfall linear infinite;will-change:transform}
+.regen b{color:#d6ffe4;text-shadow:0 0 9px #b9ffd0;font-weight:400}
+@keyframes matrixfall{0%{transform:translateY(-105%)}100%{transform:translateY(105%)}}
+@media (prefers-reduced-motion: reduce){.cube{animation:none}.regen{animation:none}}
+@media(max-width:860px){
+  .headrow,.topbar{padding-right:0}
+  .headrow{text-align:center}
+  .headrow h1{padding-top:0}
+  .topbar{justify-content:center}
+  .clockbox{position:static;--uhr:100px;--wrf:94px;flex-direction:row;gap:1.1rem;
+    justify-content:center;margin:.2rem 0 .9rem}
+}
+</style>
+</head>
+<body>
+
+<div class="park l"><img src="bilder/yellowstone.jpg" alt="Yellowstone Nationalpark"><span class="cap">Yellowstone</span></div>
+<div class="park r"><img src="bilder/yosemite.jpg" alt="Yosemite Nationalpark"><span class="cap">Yosemite</span></div>
+
+<div class="wrap">
+
+  <div class="headrow">
+    <h1><span class="mark">1.Semester WIF</span></h1>
+    <div class="clockbox">
+      <svg class="analog" viewBox="0 0 100 100" aria-label="Analoge Uhr">
+        <circle class="zb" cx="50" cy="50" r="47"></circle>
+        <g class="ticks" id="ticks"></g>
+        <line class="hz std" id="zStd" x1="50" y1="50" x2="50" y2="28"></line>
+        <line class="hz min" id="zMin" x1="50" y1="50" x2="50" y2="18"></line>
+        <line class="hz sek" id="zSek" x1="50" y1="56" x2="50" y2="14"></line>
+        <circle class="mitte" cx="50" cy="50" r="3.2"></circle>
+      </svg>
+      <div class="scene">
+        <div class="cube" id="cube">
+          <div class="face f-front"><span class="zeit">--:--:--</span></div>
+          <div class="face f-back"><span class="zeit">--:--:--</span></div>
+          <div class="face f-right"><span class="zeit">--:--:--</span></div>
+          <div class="face f-left"><span class="zeit">--:--:--</span></div>
+          <div class="face f-top"></div>
+          <div class="face f-bottom"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topbar">
+    <a class="btn" href="hauptseite.html">🎄 Adventskalender</a>
+    <a class="btn" id="anfahrt" href="https://www.google.com/maps/dir/?api=1&destination=DHBW+Ravensburg+Marienplatz+2" target="_blank" rel="noopener">🚗 Anfahrt</a>
+    <button class="btn" id="themeBtn" type="button">🌙 Dunkel</button>
+  </div>
+
+  <div id="klausurbar" hidden></div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-p="woche">Woche</button>
+    <button class="tab" role="tab" data-p="liste">Liste</button>
+    <button class="tab" role="tab" data-p="countdown">Countdown</button>
+    <button class="tab" role="tab" data-p="mensa">Mensa</button>
+    <button class="tab" role="tab" data-p="widget">Widget</button>
+  </div>
+
+  <section class="panel" id="p-woche">
+    <div class="weeknav">
+      <span class="label" id="wLabel">–</span>
+      <button class="btn" id="wPrev" type="button">‹ Woche</button>
+      <button class="btn" id="wToday" type="button">Heute</button>
+      <button class="btn" id="wNext" type="button">Woche ›</button>
+    </div>
+    <div class="week-scroll"><div class="week" id="wGrid"></div></div>
+    <div class="legend">
+      <span><i style="background:#38bdf8"></i>Vorlesung</span>
+      <span><i style="background:transparent;border:1px dashed var(--muted)"></i>Tutorium</span>
+      <span><i style="background:transparent;border:2px solid var(--danger)"></i>Klausur</span>
+      <span><i style="background:#94a3b8"></i>Sonstiges</span>
+    </div>
+  </section>
+
+  <section class="panel" id="p-liste">
+    <div class="weeknav">
+      <span class="label" id="lLabel">Kommende Termine</span>
+      <button class="btn" id="lToggle" type="button">Ganzes Semester zeigen</button>
+    </div>
+    <div id="lOut"></div>
+  </section>
+
+  <section class="panel" id="p-countdown">
+    <div class="cdgrid" id="cdOut"></div>
+    <div id="cdProg" style="margin-top:1.6rem"></div>
+    <div id="cdKlausuren" style="margin-top:1.6rem"></div>
+  </section>
+
+  <section class="panel" id="p-mensa">
+    <div class="mdays" id="mDays"></div>
+    <div id="mOut"></div>
+  </section>
+
+  <section class="panel" id="p-widget">
+    <h2 class="sec">Semesterplan als Widget</h2>
+    <p class="hint">Die nächsten Termine und der Klausur-Countdown direkt auf dem Home-Bildschirm vom iPhone oder iPad.
+      Das Widget holt sich die Termine immer frisch von dieser Website: Änderst du <b>termine.js</b> auf GitHub,
+      steht es beim nächsten Aktualisieren von selbst im Widget.</p>
+    <p style="margin-top:1rem"><a class="btn primary" href="widget.html">Zur Anleitung →</a></p>
+  </section>
+
+  <footer>
+    Kurs RV-WWIBE126 · Termine stehen in <b>termine.js</b> ·
+    <a href="hauptseite.html">Adventskalender</a>
+  </footer>
+</div>
+
+<script src="termine.js"></script>
+<script src="mensa-plan.js"></script>
+<script>
+/* ===================== Grundlagen ===================== */
+const ALLE = (window.TERMINE || []).filter(t => t && t.datum && t.von && t.bis && t.titel);
+
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+};
+const pad = n => String(n).padStart(2,"0");
+const toMin = s => { const m=/^(\d{1,2}):(\d{2})$/.exec(String(s).trim()); return m? (+m[1])*60+(+m[2]) : null; };
+const key = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parseKey = s => { const p=String(s).split("-"); return new Date(+p[0], +p[1]-1, +p[2]); };
+function at(datum, uhr){ const d=parseKey(datum); d.setMinutes(toMin(uhr)); return d; }
+const WDAY = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+const WDAY_LANG = ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+const fmtTag = d => d.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"});
+
+const HUE = {
+  "Analysis & Lineare Algebra":220, "Logik & Algebra":255, "BWL: Einführung":140, "BWL: Marketing":168,
+  "Grundlagen der IT":282, "Einführung in die Programmierung":335, "Einführung in die Wirtschaftsinformatik":192,
+  "Vertrags- und Schuldrecht":105, "Wissenschaftliches Arbeiten":312, "Präsentations- & Kommunikationskompetenz":68
+};
+function hueOf(titel){
+  if (HUE[titel] != null) return HUE[titel];
+  let h = 7; for (const c of titel) h = (h*31 + c.charCodeAt(0)) >>> 0;
+  return h % 360;
+}
+function farbe(t){
+  if (t.art === "sonstiges") return "#94a3b8";
+  if (t.art === "pruefung")  return "#ef4444";
+  return "hsl(" + hueOf(t.titel) + " 70% 58%)";
+}
+
+/* ===================== Theme ===================== */
+const themeBtn = document.getElementById("themeBtn");
+function setTheme(m){
+  document.documentElement.dataset.theme = m;
+  themeBtn.textContent = m === "light" ? "☀️ Hell" : "🌙 Dunkel";
+  store.set("theme", m);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", m === "light" ? "#f1f5f9" : "#0f172a");
+}
+setTheme(store.get("theme") === "light" ? "light" : "dark");
+themeBtn.addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light"));
+
+/* ===================== Klausur-Leiste (immer sichtbar) ===================== */
+(function(){
+  const bar = document.getElementById("klausurbar");
+  const klausuren = ALLE.filter(t => t.art === "pruefung");
+  if (!klausuren.length) return;
+  bar.hidden = false;
+
+  const titel = document.createElement("span");
+  titel.className = "kb-title";
+  titel.textContent = "⚠️ KLAUSUREN!!!";
+  bar.appendChild(titel);
+
+  const felder = klausuren.map(t => {
+    const el = document.createElement("span");
+    el.className = "kb";
+    const nm = document.createElement("span");
+    nm.className = "nm";
+    nm.textContent = t.titel.replace(/^Klausur\s*/i, "") + ": ";
+    const b = document.createElement("b");
+    b.textContent = "–";
+    el.appendChild(nm); el.appendChild(b);
+    bar.appendChild(el);
+    return { ziel: at(t.datum, t.von), b: b, el: el };
+  });
+
+  function tick(){
+    const now = new Date();
+    let offen = 0;
+    felder.forEach(f => {
+      let ms = f.ziel - now;
+      if (ms <= 0){ f.b.textContent = "vorbei ✓"; f.el.style.opacity = ".6"; return; }
+      offen++;
+      const t = Math.floor(ms/864e5); ms -= t*864e5;
+      const h = Math.floor(ms/36e5);  ms -= h*36e5;
+      const m = Math.floor(ms/6e4);   ms -= m*6e4;
+      const s = Math.floor(ms/1e3);
+      f.b.textContent = t > 0 ? "noch " + t + (t === 1 ? " Tag" : " Tage") + "!!!"
+                              : pad(h)+":"+pad(m)+":"+pad(s) + " !!!";
+    });
+    bar.classList.toggle("done", offen === 0);
+    if (offen === 0) titel.textContent = "✅ Alle Klausuren geschafft!";
+    document.documentElement.style.setProperty("--barh", (bar.offsetHeight + 6) + "px");
+  }
+  tick(); setInterval(tick, 1000);
+  window.addEventListener("resize", () =>
+    document.documentElement.style.setProperty("--barh", (bar.offsetHeight + 6) + "px"));
+})();
+
+/* ===================== Reiter ===================== */
+const tabs = Array.from(document.querySelectorAll(".tab"));
+function openPanel(name){
+  tabs.forEach(t => {
+    const on = t.dataset.p === name;
+    t.setAttribute("aria-selected", on ? "true" : "false");
+    document.getElementById("p-" + t.dataset.p).classList.toggle("active", on);
+  });
+  store.set("tab", name);
+  if (name === "mensa") ladeMensa();
+}
+tabs.forEach(t => t.addEventListener("click", () => openPanel(t.dataset.p)));
+const gespeichert = store.get("tab");
+openPanel(tabs.some(t => t.dataset.p === gespeichert) ? gespeichert : "woche");
+
+/* ===================== Woche ===================== */
+const HH = 54, PAD = 10;
+let wochenStart = montagVon(startDatum());
+
+function montagVon(d){
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+  return x;
+}
+function startDatum(){
+  const heute = new Date();
+  if (!ALLE.length) return heute;
+  const h = key(heute);
+  const kommend = ALLE.find(t => t.datum >= h);
+  if (kommend) return (h >= ALLE[0].datum) ? heute : parseKey(kommend.datum);
+  return parseKey(ALLE[ALLE.length - 1].datum);
+}
+
+function bauWoche(){
+  const grid = document.getElementById("wGrid");
+  const ende = new Date(wochenStart); ende.setDate(ende.getDate() + 6);
+  document.getElementById("wLabel").textContent =
+    "Woche " + fmtTag(wochenStart) + " – " + fmtTag(ende) + ende.getFullYear();
+
+  const tage = [];
+  for (let i = 0; i < 7; i++){
+    const d = new Date(wochenStart); d.setDate(d.getDate() + i);
+    const k = key(d);
+    const items = ALLE.filter(t => t.datum === k);
+    if (i < 5 || items.length) tage.push({ d, k, items });
+  }
+  const alle = tage.reduce((a, t) => a.concat(t.items), []);
+  grid.style.gridTemplateColumns = "48px repeat(" + tage.length + ", minmax(112px, 1fr))";
+  grid.style.setProperty("--hh", HH + "px");
+  grid.style.setProperty("--pad", PAD + "px");
+  grid.innerHTML = "";
+
+  if (!alle.length){
+    grid.style.gridTemplateColumns = "1fr"; grid.style.minWidth = "0";
+    grid.innerHTML = '<p class="hint">In dieser Woche sind keine Termine eingetragen. Nutze die Pfeile oben.</p>';
+    return;
+  }
+  grid.style.minWidth = "620px";
+
+  const h0 = Math.max(0, Math.floor(Math.min.apply(null, alle.map(t => toMin(t.von))) / 60) - 1);
+  const h1 = Math.min(24, Math.ceil(Math.max.apply(null, alle.map(t => toMin(t.bis))) / 60) + 1);
+  const hoehe = (h1 - h0) * HH + PAD * 2;
+  const heuteK = key(new Date());
+
+  const ecke = document.createElement("div"); ecke.className = "head"; grid.appendChild(ecke);
+  tage.forEach(t => {
+    const h = document.createElement("div");
+    h.className = "head" + (t.k === heuteK ? " today" : "");
+    h.innerHTML = "<span></span><small></small>";
+    h.querySelector("span").textContent = WDAY[t.d.getDay()];
+    h.querySelector("small").textContent = t.k === heuteK ? "heute" : fmtTag(t.d);
+    grid.appendChild(h);
+  });
+
+  const zeit = document.createElement("div");
+  zeit.className = "timecol"; zeit.style.height = hoehe + "px";
+  for (let h = h0; h <= h1; h++){
+    const s = document.createElement("span");
+    s.style.top = ((h - h0) * HH + PAD) + "px";
+    s.textContent = pad(h);
+    zeit.appendChild(s);
+  }
+  grid.appendChild(zeit);
+
+  tage.forEach(t => {
+    const col = document.createElement("div");
+    col.className = "daycol" + (t.k === heuteK ? " today" : "");
+    col.style.height = hoehe + "px";
+    const items = t.items.slice().sort((a,b) => toMin(a.von) - toMin(b.von));
+    const spuren = lanes(items);
+
+    items.forEach((it, i) => {
+      const a = toMin(it.von), b = toMin(it.bis);
+      const { lane, von } = spuren[i];
+      const br = 100 / von;
+      const ev = document.createElement("div");
+      ev.className = "ev " + it.art;
+      ev.style.setProperty("--c", farbe(it));
+      ev.style.top = ((a - h0*60) / 60 * HH + PAD) + "px";
+      ev.style.height = Math.max(24, (b - a) / 60 * HH - 3) + "px";
+      ev.style.left = "calc(" + (lane * br) + "% + 3px)";
+      ev.style.width = "calc(" + br + "% - 6px)";
+      ev.innerHTML = "<b></b><span class='m'></span><span class='m'></span>";
+      ev.querySelector("b").textContent = it.titel;
+      const sp = ev.querySelectorAll(".m");
+      sp[0].textContent = it.von + "–" + it.bis + (it.raum ? " · " + it.raum : "");
+      sp[1].textContent = [it.art === "tutorium" ? "Tutorium" : "", it.dozent].filter(Boolean).join(" · ");
+      ev.title = it.titel + "\n" + it.von + "–" + it.bis +
+                 (it.raum ? "\n" + it.raum : "") + (it.dozent ? "\n" + it.dozent : "") +
+                 (it.hinweis ? "\n\n" + it.hinweis : "");
+      col.appendChild(ev);
+    });
+
+    if (t.k === heuteK){
+      const n = new Date(), jetzt = n.getHours()*60 + n.getMinutes();
+      if (jetzt >= h0*60 && jetzt <= h1*60){
+        const l = document.createElement("div");
+        l.className = "nowline";
+        l.style.top = ((jetzt - h0*60) / 60 * HH + PAD) + "px";
+        col.appendChild(l);
+      }
+    }
+    grid.appendChild(col);
+  });
+}
+function lanes(items){
+  const out = items.map(() => ({ lane: 0, von: 1 }));
+  let gruppe = [], gEnde = -1;
+  const schliessen = () => {
+    const breite = gruppe.reduce((m, i) => Math.max(m, out[i].lane + 1), 1);
+    gruppe.forEach(i => out[i].von = breite);
+    gruppe = [];
+  };
+  items.forEach((it, i) => {
+    const a = toMin(it.von), b = toMin(it.bis);
+    if (a >= gEnde && gruppe.length) schliessen();
+    const belegt = gruppe.filter(j => toMin(items[j].bis) > a).map(j => out[j].lane);
+    let l = 0; while (belegt.indexOf(l) >= 0) l++;
+    out[i].lane = l; gruppe.push(i); gEnde = Math.max(gEnde, b);
+  });
+  if (gruppe.length) schliessen();
+  return out;
+}
+document.getElementById("wPrev").addEventListener("click", () => { wochenStart.setDate(wochenStart.getDate()-7); bauWoche(); });
+document.getElementById("wNext").addEventListener("click", () => { wochenStart.setDate(wochenStart.getDate()+7); bauWoche(); });
+document.getElementById("wToday").addEventListener("click", () => { wochenStart = montagVon(new Date()); bauWoche(); });
+bauWoche();
+
+/* ===================== Liste ===================== */
+let zeigeAlles = false;
+function bauListe(){
+  const out = document.getElementById("lOut");
+  const heuteK = key(new Date());
+  const liste = zeigeAlles ? ALLE : ALLE.filter(t => t.datum >= heuteK);
+  document.getElementById("lLabel").textContent = zeigeAlles ? "Alle Termine" : "Kommende Termine";
+  document.getElementById("lToggle").textContent = zeigeAlles ? "Nur kommende zeigen" : "Ganzes Semester zeigen";
+  out.innerHTML = "";
+  if (!liste.length){ out.innerHTML = '<p class="hint">Keine Termine vorhanden.</p>'; return; }
+
+  let letzter = null, g = null;
+  liste.forEach(t => {
+    if (t.datum !== letzter){
+      letzter = t.datum;
+      g = document.createElement("div"); g.className = "daygroup";
+      const d = parseKey(t.datum);
+      const h3 = document.createElement("h3");
+      h3.textContent = WDAY_LANG[d.getDay()] + ", " + d.toLocaleDateString("de-DE",{day:"2-digit",month:"long"}) +
+                       (t.datum === heuteK ? " · heute" : "");
+      g.appendChild(h3); out.appendChild(g);
+    }
+    const r = document.createElement("div");
+    r.className = "row " + t.art;
+    r.style.setProperty("--c", farbe(t));
+    r.innerHTML = "<div class='t'></div><div class='i'><b></b><span></span></div>";
+    r.querySelector(".t").textContent = t.von + "–" + t.bis;
+    const b = r.querySelector("b");
+    b.textContent = t.titel;
+    if (t.art === "tutorium"){ const s=document.createElement("span"); s.className="badge"; s.textContent="Tutorium"; b.appendChild(s); }
+    if (t.art === "pruefung"){ const s=document.createElement("span"); s.className="badge p"; s.textContent="Klausur"; b.appendChild(s); }
+    r.querySelector(".i span").textContent = [t.raum, t.dozent, t.hinweis].filter(Boolean).join(" · ") || "—";
+    g.appendChild(r);
+  });
+}
+document.getElementById("lToggle").addEventListener("click", () => { zeigeAlles = !zeigeAlles; bauListe(); });
+bauListe();
+
+/* ===================== Countdown ===================== */
+(function(){
+  const out = document.getElementById("cdOut");
+  const jetzt = new Date();
+  const kommend = ALLE.filter(t => at(t.datum, t.von) > jetzt);
+  const karten = [];
+  if (kommend.length){
+    const n = kommend[0];
+    karten.push({ titel:"Nächster Termin", ziel: at(n.datum, n.von),
+      sub: n.titel + " · " + n.von + (n.raum ? " · " + n.raum : "") });
+  }
+  ALLE.filter(t => t.art === "pruefung").forEach(t => {
+    karten.push({ titel: t.titel, ziel: at(t.datum, t.von), p: true,
+      sub: parseKey(t.datum).toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"long"}) + " · " + t.von });
+  });
+  karten.push({ titel:"Weihnachten", ziel:new Date(jetzt.getFullYear(), 11, 24, 18, 0), sub:"Heiligabend" });
+
+  out.innerHTML = "";
+  const felder = karten.map(k => {
+    const el = document.createElement("div");
+    el.className = "cdcard" + (k.p ? " p" : "");
+    el.innerHTML = "<h3></h3><div class='big'>–</div><div class='sub'></div>";
+    el.querySelector("h3").textContent = k.titel;
+    el.querySelector(".sub").textContent = k.sub || "";
+    out.appendChild(el);
+    return { k, big: el.querySelector(".big") };
+  });
+  function tick(){
+    const now = new Date();
+    felder.forEach(f => {
+      let ms = f.k.ziel - now;
+      if (ms <= 0){ f.big.textContent = f.k.p ? "vorbei ✓" : "Jetzt!"; return; }
+      const t = Math.floor(ms/864e5); ms -= t*864e5;
+      const h = Math.floor(ms/36e5);  ms -= h*36e5;
+      const m = Math.floor(ms/6e4);   ms -= m*6e4;
+      const s = Math.floor(ms/1e3);
+      f.big.textContent = t > 0 ? t + " T " + pad(h)+":"+pad(m)+":"+pad(s) : pad(h)+":"+pad(m)+":"+pad(s);
+    });
+  }
+  tick(); setInterval(tick, 1000);
+
+  if (ALLE.length){
+    const s = at(ALLE[0].datum, ALLE[0].von), e = at(ALLE[ALLE.length-1].datum, ALLE[ALLE.length-1].bis);
+    const p = Math.min(100, Math.max(0, (new Date() - s) / (e - s) * 100));
+    document.getElementById("cdProg").innerHTML =
+      "<h2 class='sec'>Semesterfortschritt</h2><div class='bar'><div style='width:" + p.toFixed(1) + "%'></div></div>" +
+      "<div class='barlab'><span>" + s.toLocaleDateString("de-DE") + "</span><span>" + p.toFixed(0) +
+      " % geschafft</span><span>" + e.toLocaleDateString("de-DE") + "</span></div>";
+  }
+  const kl = ALLE.filter(t => t.art === "pruefung");
+  if (kl.length){
+    const box = document.getElementById("cdKlausuren");
+    box.innerHTML = "<h2 class='sec'>Alle Klausuren</h2>";
+    kl.forEach(t => {
+      const d = parseKey(t.datum);
+      const r = document.createElement("div");
+      r.className = "row pruefung";
+      r.style.setProperty("--c", "#ef4444");
+      r.innerHTML = "<div class='t'></div><div class='i'><b></b><span></span></div>";
+      r.querySelector(".t").textContent = WDAY[d.getDay()] + " " + fmtTag(d);
+      r.querySelector("b").textContent = t.titel;
+      r.querySelector(".i span").textContent = t.von + "–" + t.bis + (t.raum ? " · " + t.raum : "");
+      box.appendChild(r);
+    });
+  }
+})();
+
+/* ===================== Mensa ===================== */
+const MENSA_XML   = "https://www.max-manager.de/daten-extern/seezeit/xml/mensa_ravensburg/speiseplan.xml";
+const MENSA_SEITE = "https://seezeit.com/essen/speiseplaene/mensa-ravensburg/";
+const MEALDB = "https://www.themealdb.com/api/json/v1/1/";
+const mensa = { status: "leer", tage: [], tag: null };
+const SIDE_RE = /^(sättigung|beilage|gemüse|salat|dessert|suppe)/i;
+
+function sauber(t){
+  return String(t || "")
+    .replace(/\s*\(\s*\d+[a-z]?(?:\s*,\s*\d+[a-z]?)*\s*\)/gi, "")
+    .replace(/\s*,\s*/g, ", ").replace(/\(\s*/g, "(").replace(/\s*\)/g, ")")
+    .replace(/\s+/g, " ").trim();
+}
+function parseMensa(text){
+  const doc = new DOMParser().parseFromString(text, "application/xml");
+  if (doc.querySelector("parsererror") || !doc.querySelector("speiseplan")) return null;
+  const val = (it, n) => { const x = it.querySelector(n); return x ? x.textContent.trim() : ""; };
+  const tage = [];
+  doc.querySelectorAll("speiseplan > tag").forEach(tg => {
+    const ts = +tg.getAttribute("timestamp");
+    if (!ts) return;
+    const d = new Date(ts * 1000 + 3 * 3600e3);
+    const gerichte = Array.from(tg.querySelectorAll("item"))
+      .filter(it => (it.getAttribute("language") || "de") === "de")
+      .map(it => {
+        const cat = val(it, "category").replace(/\s+[IVX]+$/, "").replace(/^Sättigung$/i, "Beilage");
+        const voll = sauber(val(it, "title"));
+        const teile = voll.split(/\s+dazu\s+/i);
+        return { cat, name: teile[0], extra: teile.length > 1 ? "dazu " + teile.slice(1).join(" dazu ") : "",
+                 p1: val(it, "preis1"), p2: val(it, "preis2"), p3: val(it, "preis3") };
+      })
+      .filter(g => g.name);
+    if (gerichte.length) tage.push({ datum: key(d), gerichte });
+  });
+  tage.sort((a,b) => a.datum.localeCompare(b.datum));
+  return tage;
+}
+/* Der Browser darf fremde Adressen oft nicht direkt laden.
+   Deshalb wird es danach ueber oeffentliche Weiterleiter versucht. */
+const WEGE = [
+  function(u){ return u; },
+  function(u){ return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
+  function(u){ return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u); }
+];
+async function hole(url, mitUmweg){
+  const wege = mitUmweg ? WEGE : [WEGE[0]];
+  for (const weg of wege){
+    try{
+      const r = await fetch(weg(url), { cache: "no-store" });
+      if (!r.ok) continue;
+      const text = await r.text();
+      if (!text || text.length < 50) continue;
+      const tage = parseMensa(text);
+      if (tage && tage.length) return tage;
+    }catch(e){}
+  }
+  return null;
+}
+async function ladeMensa(){
+  if (mensa.status === "laedt" || mensa.status === "ok") return;
+  mensa.status = "laedt"; zeigeMensa();
+  const heuteK = key(new Date());
+  const frisch = t => t && t.some(x => x.datum >= heuteK);
+  let tage = await hole("mensa.xml?t=" + Date.now(), false);
+  if (!frisch(tage)){
+    const live = await hole(MENSA_XML, true);
+    if (live && live.length) tage = live;
+  }
+  /* Wenn nichts Aktuelles ankommt: den mitgelieferten Ersatzplan nehmen */
+  if (!frisch(tage) && window.MENSA_PLAN && window.MENSA_PLAN.tage && window.MENSA_PLAN.tage.length){
+    tage = window.MENSA_PLAN.tage;
+    mensa.ersatz = window.MENSA_PLAN.stand;
+  }
+  mensa.tage = tage || [];
+  mensa.status = mensa.tage.length ? "ok" : "fehler";
+  const pick = mensa.tage.find(t => t.datum >= heuteK) || mensa.tage[mensa.tage.length - 1];
+  mensa.tag = pick ? pick.datum : null;
+  zeigeMensa();
+}
+const euro = v => v ? String(v).replace(".", ",") + " €" : "";
+const chefkoch = n => "https://www.chefkoch.de/rs/s0/" + encodeURIComponent(n.split(/\s+(?:mit|dazu|an|auf)\s+/i)[0]) + "/Rezepte.html";
+
+function zeigeMensa(){
+  const nav = document.getElementById("mDays"), out = document.getElementById("mOut");
+  if (mensa.status === "laedt"){ nav.innerHTML=""; out.innerHTML = '<p class="hint">Speiseplan wird geladen …</p>'; return; }
+  if (mensa.status !== "ok"){
+    nav.innerHTML = "";
+    out.innerHTML = '<p class="hint">Der Speiseplan ist gerade nicht erreichbar. ' +
+      'Die Seite hat es direkt und über zwei Ausweichwege versucht.<br><br>' +
+      '<a href="' + MENSA_SEITE + '" target="_blank" rel="noopener">Plan direkt bei Seezeit ansehen →</a></p>';
+    return;
+  }
+  nav.innerHTML = "";
+  mensa.tage.forEach(t => {
+    const d = parseKey(t.datum);
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "btn";
+    b.setAttribute("aria-pressed", t.datum === mensa.tag ? "true" : "false");
+    b.textContent = WDAY[d.getDay()] + " " + d.getDate() + ".";
+    b.addEventListener("click", () => { mensa.tag = t.datum; zeigeMensa(); });
+    nav.appendChild(b);
+  });
+
+  const tag = mensa.tage.find(t => t.datum === mensa.tag);
+  if (!tag){ out.innerHTML = ""; return; }
+  const haupt = tag.gerichte.filter(g => !SIDE_RE.test(g.cat));
+  const beilagen = tag.gerichte.filter(g => SIDE_RE.test(g.cat));
+  const d = parseKey(tag.datum);
+
+  out.innerHTML = "";
+
+  if (mensa.ersatz){
+    const warn = document.createElement("div");
+    warn.className = "ersatz";
+    const letzter = mensa.tage[mensa.tage.length - 1].datum;
+    const veraltet = letzter < key(new Date());
+    warn.innerHTML = "<b>Ersatzplan</b> vom " + parseKey(mensa.ersatz).toLocaleDateString("de-DE") +
+      ". Der Live-Plan von Seezeit ist gerade nicht erreichbar" +
+      (veraltet ? ", und dieser Ersatzplan ist inzwischen abgelaufen" : "") + ".<br>" +
+      '<a href="' + MENSA_SEITE + '" target="_blank" rel="noopener">Aktuellen Plan bei Seezeit ansehen \u2192</a>';
+    out.appendChild(warn);
+  }
+
+  const h = document.createElement("h2"); h.className = "sec";
+  h.textContent = "Mensa Ravensburg · " + WDAY_LANG[d.getDay()] + ", " + d.toLocaleDateString("de-DE",{day:"numeric",month:"long"});
+  out.appendChild(h);
+
+  const grid = document.createElement("div"); grid.className = "mgrid";
+  haupt.forEach(g => {
+    const c = document.createElement("div"); c.className = "dish";
+    c.innerHTML =
+      "<div class='ph'><span class='emo'>🍽️</span><span class='pill cat'></span><span class='pill price'></span></div>" +
+      "<div class='b'><h4></h4><span class='ex'></span>" +
+      "<a class='chef' target='_blank' rel='noopener'>Rezept dazu auf Chefkoch ↗</a>" +
+      "<span class='pr2'></span></div>";
+    c.querySelector(".pill.cat").textContent = g.cat || "Gericht";
+    c.querySelector(".pill.price").textContent = euro(g.p1);
+    c.querySelector("h4").textContent = g.name;
+    c.querySelector(".ex").textContent = g.extra || "";
+    c.querySelector(".chef").href = chefkoch(g.name);
+    c.querySelector(".pr2").textContent =
+      [g.p2 ? "Bedienstete " + euro(g.p2) : "", g.p3 ? "Gäste " + euro(g.p3) : ""].filter(Boolean).join(" · ");
+    grid.appendChild(c);
+    foto(g.name, g.cat).then(f => {
+      if (!f) return;
+      const ph = c.querySelector(".ph");
+      const img = document.createElement("img");
+      img.alt = ""; img.loading = "lazy"; img.src = f;
+      ph.insertBefore(img, ph.firstChild);
+      const emo = ph.querySelector(".emo");
+      if (emo) emo.remove();
+      const sym = document.createElement("span");
+      sym.className = "pill sym"; sym.textContent = "Symbolbild";
+      ph.appendChild(sym);
+    });
+  });
+  out.appendChild(grid);
+
+  if (beilagen.length){
+    const h2 = document.createElement("h2"); h2.className = "sec"; h2.style.marginTop = "1.6rem";
+    h2.textContent = "Beilagen, Salate und Desserts"; out.appendChild(h2);
+    const s = document.createElement("div"); s.className = "sides";
+    beilagen.forEach(g => {
+      const r = document.createElement("div"); r.className = "side";
+      r.innerHTML = "<img class='th' alt='' loading='lazy'><div class='sb'><span class='cat'></span><b></b></div><span class='p'></span>";
+      r.querySelector(".cat").textContent = g.cat || "";
+      r.querySelector("b").textContent = g.name;
+      r.querySelector(".p").textContent = euro(g.p1);
+      s.appendChild(r);
+      foto(g.name, g.cat).then(f => { if (f) r.querySelector(".th").src = f; });
+    });
+    out.appendChild(s);
+  }
+
+  const n = document.createElement("p"); n.className = "note";
+  n.innerHTML = "Die Fotos sind Symbolbilder (Rezeptfotos von TheMealDB, bei schwäbischen Klassikern von Wikipedia), " +
+    "passend zum Namen des Gerichts ausgesucht. Sie zeigen nicht das Essen aus der Mensa. " +
+    "Bei jedem Gericht führt ein Link zu passenden Rezepten auf Chefkoch. Die Preise auf den Fotos gelten für Studierende. " +
+    'Speiseplan, Preise und Allergene: <a href="' + MENSA_SEITE + '" target="_blank" rel="noopener">Seezeit</a>.';
+  out.appendChild(n);
+}
+
+/* --- Fotos --- */
+const REGELN = [
+  [/linsen/,                 { wiki:"Linsen mit Spätzle", cat:"Vegetarian" }],
+  [/käs(e)?spätzle|spätzle/, { wiki:"Käsespätzle",        cat:"Vegetarian" }],
+  [/maultasche/,             { wiki:"Maultasche",         cat:"Pasta" }],
+  [/schupfnudel/,            { wiki:"Schupfnudel",        cat:"Side" }],
+  [/currywurst/,             { wiki:"Currywurst",         cat:"Pork" }],
+  [/cordon bleu|schnitzel/,  { wiki:"Cordon bleu",        cat:"Pork" }],
+  [/leberkäs/,               { wiki:"Leberkäse",          cat:"Pork" }],
+  [/rote grütze/,            { wiki:"Rote Grütze",        cat:"Dessert" }],
+  [/kaiserschmarrn/,         { wiki:"Kaiserschmarrn",     cat:"Dessert" }],
+  [/gulasch/,                { wiki:"Gulasch",            cat:"Beef" }],
+  [/rotkohl|rotkraut/,       { wiki:"Rotkohl",            cat:"Side" }],
+  [/knödel/,                 { wiki:"Kartoffelkloß",      cat:"Side" }],
+  [/falafel/,                { meal:["falafel"],  cat:"Vegetarian" }],
+  [/curry/,                  { meal:["curry"],    cat:"Chicken" }],
+  [/lasagne|cannelloni/,     { meal:["lasagne"],  cat:"Pasta" }],
+  [/pasta|nudel|spaghetti/,  { meal:["pasta"],    cat:"Pasta" }],
+  [/nugget/,                 { meal:["chicken"],  cat:"Chicken" }],
+  [/burger/,                 { meal:["burger"],   cat:"Beef" }],
+  [/lachs|seelachs|fisch|stäbchen/, { meal:["salmon"], cat:"Seafood" }],
+  [/pute|hähnchen|geflügel|hühner/, { meal:["chicken"], cat:"Chicken" }],
+  [/ragout|bolognese|hack/,  { meal:["stew"],     cat:"Beef" }],
+  [/reis|risotto/,           { meal:["rice"],     cat:"Side" }],
+  [/kartoffel|pommes/,       { meal:["potato"],   cat:"Side" }],
+  [/brokkoli|gemüse|karotte|bohnen|spinat|kohlrabi/, { meal:["vegetable"], cat:"Vegetarian" }],
+  [/suppe/,                  { meal:["soup"],     cat:"Starter" }],
+  [/salat/,                  { meal:["salad"],    cat:"Starter" }],
+  [/pudding|quark|joghurt|mousse|dessert|grütze/, { meal:["pudding"], cat:"Dessert" }],
+  [/frühlingsrolle|asia|glasnudel/, { meal:["noodle"], cat:"Vegetarian" }]
+];
+function plan(name, cat){
+  const n = name.toLowerCase();
+  const kopf = n.split(/\s+(?:mit|dazu|an|auf)\s+/)[0];
+  let r = REGELN.find(x => x[0].test(kopf)) || REGELN.find(x => x[0].test(n));
+  r = r ? r[1] : null;
+  let fallback = "Miscellaneous";
+  const c = (cat || "").toLowerCase();
+  if (/dessert/.test(c)) fallback = "Dessert";
+  else if (/salat|suppe/.test(c)) fallback = "Starter";
+  else if (/beilage|gemüse|sättigung/.test(c)) fallback = "Side";
+  else if (/vegan|vegetar/.test(c + " " + n)) fallback = "Vegetarian";
+  return { wiki: r && r.wiki, meal: (r && r.meal) || [], cat: (r && r.cat) || fallback };
+}
+const hashStr = s => { let h = 7; for (const c of s) h = (h*31 + c.charCodeAt(0)) >>> 0; return h; };
+const cacheApi = new Map();
+function json(u){
+  if (!cacheApi.has(u)) cacheApi.set(u, fetch(u).then(r => { if(!r.ok) throw 0; return r.json(); }).catch(e => { cacheApi.delete(u); throw e; }));
+  return cacheApi.get(u);
+}
+async function wikiFoto(titel){
+  const j = await json("https://de.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=700&titles=" + encodeURIComponent(titel));
+  const p = Object.values((j.query && j.query.pages) || {}).find(x => x.thumbnail && !/\.svg/i.test(x.thumbnail.source));
+  return p ? p.thumbnail.source : null;
+}
+async function mealSuche(begriff, name){
+  const j = await json(MEALDB + "search.php?s=" + encodeURIComponent(begriff));
+  const l = (j.meals || []).filter(m => m.strMealThumb);
+  return l.length ? l[hashStr(name) % l.length].strMealThumb : null;
+}
+async function mealKat(cat, name){
+  const j = await json(MEALDB + "filter.php?c=" + encodeURIComponent(cat));
+  const l = (j.meals || []).filter(m => m.strMealThumb);
+  return l.length ? l[hashStr(name) % l.length].strMealThumb : null;
+}
+async function foto(name, cat){
+  const p = plan(name, cat);
+  try { if (p.wiki){ const f = await wikiFoto(p.wiki); if (f) return f; } } catch(e){}
+  for (const b of p.meal){ try { const f = await mealSuche(b, name); if (f) return f; } catch(e){} }
+  try { return await mealKat(p.cat, name); } catch(e){ return null; }
+}
+
+/* ===================== Uhr und Matrix-Wuerfel ===================== */
+(function(){
+  /* Ziffernblatt-Striche */
+  var ticks = document.getElementById("ticks");
+  if (ticks){
+    for (var i = 0; i < 60; i++){
+      var gross = i % 5 === 0;
+      var l = document.createElementNS("http://www.w3.org/2000/svg","line");
+      var a = i * 6 * Math.PI / 180;
+      var r1 = gross ? 38 : 41, r2 = 44;
+      l.setAttribute("x1", (50 + Math.sin(a)*r1).toFixed(2));
+      l.setAttribute("y1", (50 - Math.cos(a)*r1).toFixed(2));
+      l.setAttribute("x2", (50 + Math.sin(a)*r2).toFixed(2));
+      l.setAttribute("y2", (50 - Math.cos(a)*r2).toFixed(2));
+      if (gross) l.setAttribute("class","gross");
+      ticks.appendChild(l);
+    }
+  }
+
+  /* Matrix-Regen auf den vier Seitenflaechen */
+  var ZEICHEN = "\u30A2\u30AB\u30B5\u30BF\u30CA\u30CF\u30DE\u30E4\u30E9\u30EF0123456789ABCDEF<>/*+-";
+  function strang(n){
+    var out = "";
+    for (var i = 0; i < n; i++) out += ZEICHEN.charAt(Math.floor(Math.random()*ZEICHEN.length)) + "\n";
+    return out.slice(0, -1);
+  }
+  var saeulen = [];
+  ["f-front","f-back","f-right","f-left","f-top","f-bottom"].forEach(function(k){
+    var face = document.querySelector("." + k);
+    if (!face) return;
+    for (var c = 0; c < 4; c++){
+      var sp = document.createElement("span");
+      sp.className = "regen";
+      sp.style.left = (6 + c * 24) + "%";
+      sp.style.animationDuration = (2.6 + Math.random()*2.6).toFixed(2) + "s";
+      sp.style.animationDelay = (-Math.random()*3).toFixed(2) + "s";
+      sp.textContent = strang(9);
+      face.appendChild(sp);
+      saeulen.push(sp);
+    }
+  });
+  setInterval(function(){
+    for (var i = 0; i < 3; i++){
+      var sp = saeulen[Math.floor(Math.random()*saeulen.length)];
+      if (sp) sp.textContent = strang(9);
+    }
+  }, 320);
+
+  /* Zeit */
+  var zStd = document.getElementById("zStd"), zMin = document.getElementById("zMin"), zSek = document.getElementById("zSek");
+  var zeitFelder = Array.prototype.slice.call(document.querySelectorAll(".zeit"));
+  function uhr(){
+    var d = new Date();
+    var h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
+    if (zStd) zStd.setAttribute("transform", "rotate(" + ((h % 12) * 30 + m * 0.5) + " 50 50)");
+    if (zMin) zMin.setAttribute("transform", "rotate(" + (m * 6 + s * 0.1) + " 50 50)");
+    if (zSek) zSek.setAttribute("transform", "rotate(" + (s * 6) + " 50 50)");
+    var txt = pad(h) + ":" + pad(m) + ":" + pad(s);
+    zeitFelder.forEach(function(el){ el.textContent = txt; });
+  }
+  uhr(); setInterval(uhr, 1000);
+})();
+</script>
+</body>
+</html>

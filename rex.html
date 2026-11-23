@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="bilder/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="bilder/favicon-512.png">
+  <link rel="apple-touch-icon" href="bilder/apple-touch-icon.png">
+<title>Rex</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--text:#f8fafc;--muted:#94a3b8;--accent:#38bdf8;
+  --accent-text:#0f172a;--border:#334155;--boden:#475569;--rex:#38bdf8;--kaktus:#22c55e;--wolke:#334155}
+:root[data-theme="light"]{--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--accent:#0284c7;
+  --accent-text:#fff;--border:#cbd5e1;--boden:#94a3b8;--rex:#0284c7;--kaktus:#16a34a;--wolke:#e2e8f0}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:1.1rem 1rem 2rem;
+  display:flex;flex-direction:column;align-items:center}
+.top{width:100%;max-width:760px;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
+.top h1{font-size:1.5rem;margin-right:auto}
+.btn{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:10px;
+  padding:.45rem .8rem;font-size:.86rem;font-weight:600;cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;gap:.35rem}
+.btn:hover{filter:brightness(1.15)}
+.btn.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.scores{width:100%;max-width:760px;display:flex;gap:1rem;margin-bottom:.8rem}
+.sc{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.6rem .9rem;text-align:center}
+.sc span{display:block;font-size:.75rem;color:var(--muted);font-weight:600}
+.sc b{font-size:1.4rem;font-variant-numeric:tabular-nums}
+.stage{position:relative;width:100%;max-width:760px}
+canvas{width:100%;height:auto;display:block;background:var(--card);
+  border:1px solid var(--border);border-radius:14px;touch-action:manipulation}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(15,23,42,.82);border-radius:14px;text-align:center;padding:1.2rem;backdrop-filter:blur(3px)}
+:root[data-theme="light"] .overlay{background:rgba(241,245,249,.9)}
+.overlay h2{font-size:1.4rem;margin-bottom:.4rem}
+.overlay p{color:var(--muted);font-size:.88rem;margin-bottom:1rem;line-height:1.5}
+.overlay[hidden]{display:none}
+.hint{color:var(--muted);font-size:.82rem;margin-top:1rem;text-align:center;max-width:760px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>🦖 Rex</h1>
+  <a class="btn" href="hauptseite.html">← Startseite</a>
+  <button class="btn" id="themeBtn" type="button">🌙 Dunkel</button>
+</div>
+
+<div class="scores">
+  <div class="sc"><span>Punkte</span><b id="score">0</b></div>
+  <div class="sc"><span>Rekord</span><b id="best">0</b></div>
+</div>
+
+<div class="stage">
+  <canvas id="c" width="760" height="260"></canvas>
+  <div class="overlay" id="ov">
+    <h2 id="ovT">Rex</h2>
+    <p id="ovP">Spring über die Kakteen und die Vögel.<br>Leertaste oder tippen zum Springen, Pfeil nach unten zum Ducken.</p>
+    <button class="btn primary" id="startBtn" type="button">Spiel starten</button>
+  </div>
+</div>
+
+<p class="hint">Am Computer: Leertaste oder Pfeil nach oben springt, Pfeil nach unten duckt sich.
+Am Handy: oben tippen zum Springen, unten halten zum Ducken. Es wird immer schneller.</p>
+
+<script>
+(function(){
+  var root=document.documentElement,tb=document.getElementById("themeBtn");
+  function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function apply(m){root.dataset.theme=m;tb.textContent=m==="light"?"☀️ Hell":"🌙 Dunkel";set("theme",m);
+    var mt=document.querySelector('meta[name="theme-color"]');if(mt)mt.setAttribute("content",m==="light"?"#f1f5f9":"#0f172a");}
+  apply(get("theme")==="light"?"light":"dark");
+  tb.addEventListener("click",function(){apply(root.dataset.theme==="light"?"dark":"light")});
+})();
+
+(function(){
+  var cv = document.getElementById("c"), ctx = cv.getContext("2d");
+  var W = cv.width, H = cv.height, BODEN = H - 46;
+  var ov = document.getElementById("ov"), ovT = document.getElementById("ovT"), ovP = document.getElementById("ovP");
+  var scoreEl = document.getElementById("score"), bestEl = document.getElementById("best");
+
+  function get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function css(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+  var best = parseInt(get("rex-best") || "0", 10) || 0;
+  bestEl.textContent = best;
+
+  var rex, hindernisse, wolken, tempo, punkte, laeuft = false, tot = false, letzter = 0, spawn = 0, bodenX = 0;
+
+  function start(){
+    rex = { x: 70, y: BODEN, vy: 0, h: 46, w: 36, duckt: false, lauf: 0 };
+    hindernisse = []; wolken = [{x:300,y:60},{x:600,y:40}];
+    tempo = 330; punkte = 0; tot = false; spawn = 0; bodenX = 0;
+    scoreEl.textContent = "0";
+    ov.hidden = true; laeuft = true; letzter = 0;
+    requestAnimationFrame(schleife);
+  }
+  function ende(){
+    laeuft = false; tot = true;
+    var p = Math.floor(punkte);
+    if (p > best){ best = p; set("rex-best", String(best)); bestEl.textContent = best; }
+    ovT.textContent = "Erwischt!";
+    ovP.innerHTML = "Du hast <b>" + p + "</b> Punkte geschafft." +
+                    (p >= best && p > 0 ? "<br>Das ist dein neuer Rekord!" : "<br>Rekord: " + best);
+    document.getElementById("startBtn").textContent = "Noch einmal";
+    ov.hidden = false;
+  }
+  function springen(){
+    if (!laeuft){ if (tot) start(); return; }
+    if (rex.y >= BODEN){ rex.vy = -780; }   /* Sprunghöhe rund 145 px */
+  }
+  function ducken(an){ if (laeuft) rex.duckt = an && rex.y >= BODEN; }
+
+  function neuesHindernis(){
+    if (Math.random() < 0.25 && punkte > 120){
+      // Vogel in zwei moeglichen Hoehen
+      var hoch = Math.random() < 0.5;
+      hindernisse.push({ art:"vogel", x: W + 20, y: hoch ? BODEN - 62 : BODEN - 28, w: 34, h: 22, f: 0 });
+    } else {
+      var n = 1 + Math.floor(Math.random() * 3);
+      hindernisse.push({ art:"kaktus", x: W + 20, y: BODEN - 40, w: 14 * n + (n - 1) * 5, h: 40, n: n });
+    }
+  }
+
+  function schleife(t){
+    if (!laeuft) return;
+    if (!letzter) letzter = t;
+    var dt = Math.min(50, t - letzter) / 1000;
+    letzter = t;
+
+    tempo += dt * 7;
+    punkte += dt * tempo / 11;
+    scoreEl.textContent = Math.floor(punkte);
+
+    rex.vy += 2100 * dt;          /* Schwerkraft in px pro Sekunde im Quadrat */
+    rex.y += rex.vy * dt;
+    if (rex.y > BODEN){ rex.y = BODEN; rex.vy = 0; }
+    rex.lauf += dt * 12;
+
+    bodenX = (bodenX + tempo * dt) % 40;
+    wolken.forEach(function(w){ w.x -= tempo * dt * 0.25; if (w.x < -80) { w.x = W + Math.random()*200; w.y = 30 + Math.random()*60; } });
+
+    spawn -= dt * tempo;
+    if (spawn <= 0){ neuesHindernis(); spawn = 320 + Math.random() * 380; }
+
+    var hoehe = rex.duckt && rex.y >= BODEN ? 26 : rex.h;
+    var breite = rex.duckt && rex.y >= BODEN ? 48 : rex.w;
+    var rx = rex.x, ry = rex.y - hoehe;
+
+    for (var i = hindernisse.length - 1; i >= 0; i--){
+      var o = hindernisse[i];
+      o.x -= tempo * dt;
+      if (o.art === "vogel") o.f += dt * 9;
+      if (o.x + o.w < -10){ hindernisse.splice(i,1); continue; }
+      var oy = o.art === "vogel" ? o.y : o.y;
+      if (rx + breite - 6 > o.x + 3 && rx + 6 < o.x + o.w - 3 &&
+          ry + 6 < oy + o.h - 3 && ry + hoehe - 4 > oy + 3){
+        zeichne(hoehe, breite); return ende();
+      }
+    }
+    zeichne(hoehe, breite);
+    requestAnimationFrame(schleife);
+  }
+
+  function zeichne(hoehe, breite){
+    ctx.fillStyle = css("--card"); ctx.fillRect(0,0,W,H);
+
+    ctx.fillStyle = css("--wolke");
+    wolken.forEach(function(w){
+      ctx.beginPath();
+      ctx.arc(w.x, w.y, 13, 0, Math.PI*2);
+      ctx.arc(w.x+16, w.y+4, 10, 0, Math.PI*2);
+      ctx.arc(w.x-15, w.y+4, 9, 0, Math.PI*2);
+      ctx.fill();
+    });
+
+    ctx.strokeStyle = css("--boden"); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, BODEN+1); ctx.lineTo(W, BODEN+1); ctx.stroke();
+    ctx.lineWidth = 1;
+    for (var x = -bodenX; x < W; x += 40){
+      ctx.beginPath(); ctx.moveTo(x, BODEN+9); ctx.lineTo(x+14, BODEN+9); ctx.stroke();
+    }
+
+    hindernisse.forEach(function(o){
+      if (o.art === "kaktus"){
+        ctx.fillStyle = css("--kaktus");
+        for (var i=0;i<o.n;i++){
+          var bx = o.x + i*19;
+          ctx.fillRect(bx+4, o.y, 7, o.h);
+          ctx.fillRect(bx, o.y+11, 4, 13);
+          ctx.fillRect(bx+11, o.y+7, 4, 15);
+        }
+      } else {
+        ctx.fillStyle = css("--boden");
+        var auf = Math.floor(o.f) % 2 === 0;
+        ctx.fillRect(o.x+8, o.y+8, 20, 7);
+        ctx.beginPath();
+        ctx.moveTo(o.x+12, o.y+10);
+        ctx.lineTo(o.x+24, auf ? o.y - 6 : o.y + 24);
+        ctx.lineTo(o.x+30, o.y+10);
+        ctx.closePath(); ctx.fill();
+        ctx.fillRect(o.x, o.y+9, 10, 4);
+      }
+    });
+
+    if (!rex) return;
+    var ry = rex.y - hoehe;
+    ctx.fillStyle = css("--rex");
+    ctx.fillRect(rex.x, ry, breite, hoehe);                              // Körper
+    ctx.fillRect(rex.x + breite - 10, ry - 10, 18, 14);                  // Kopf
+    ctx.fillStyle = css("--card");
+    ctx.fillRect(rex.x + breite + 1, ry - 6, 3, 3);                      // Auge
+    ctx.fillStyle = css("--rex");
+    if (rex.y >= BODEN){
+      var s = Math.floor(rex.lauf) % 2 === 0;
+      ctx.fillRect(rex.x + 5, rex.y, 7, s ? 7 : 3);
+      ctx.fillRect(rex.x + breite - 16, rex.y, 7, s ? 3 : 7);
+    } else {
+      ctx.fillRect(rex.x + 6, rex.y - 2, 7, 5);
+      ctx.fillRect(rex.x + breite - 17, rex.y - 2, 7, 5);
+    }
+    ctx.fillRect(rex.x - 10, ry + 4, 12, 7);                             // Schwanz
+  }
+
+  document.addEventListener("keydown", function(e){
+    var k = e.key.toLowerCase();
+    if (k === " " || k === "spacebar" || k === "arrowup" || k === "w"){ e.preventDefault(); springen(); }
+    if (k === "arrowdown" || k === "s"){ e.preventDefault(); ducken(true); }
+  });
+  document.addEventListener("keyup", function(e){
+    var k = e.key.toLowerCase();
+    if (k === "arrowdown" || k === "s") ducken(false);
+  });
+  cv.addEventListener("pointerdown", function(e){
+    var r = cv.getBoundingClientRect();
+    if ((e.clientY - r.top) / r.height > 0.62) ducken(true); else springen();
+  });
+  cv.addEventListener("pointerup", function(){ ducken(false); });
+  cv.addEventListener("pointerleave", function(){ ducken(false); });
+
+  document.getElementById("startBtn").addEventListener("click", start);
+  ctx.fillStyle = css("--card"); ctx.fillRect(0,0,W,H);
+})();
+</script>
+</body>
+</html>

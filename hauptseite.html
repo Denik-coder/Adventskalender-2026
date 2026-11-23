@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Adventskalender">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="bilder/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="bilder/favicon-512.png">
+  <link rel="apple-touch-icon" href="bilder/apple-touch-icon.png">
   <title>Adventskalender 2026 (Niklas)</title>
   <style>
     * {
@@ -35,17 +44,44 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 3rem 1rem;
+      padding: 1.2rem 1rem 3rem;
     }
+
+    .toprow {
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-bottom: 1.5rem;
+    }
+
+    .top-btn {
+      background: rgba(15, 23, 42, 0.8);
+      color: #f8fafc;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .top-btn:hover { background: rgba(30, 41, 59, 0.9); }
 
     header {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
     }
 
     header h1 {
-      font-size: 2.6rem;
+      font-size: 2.5rem;
       color: #ffffff;
       text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
     }
@@ -55,6 +91,29 @@
       margin-top: 0.5rem;
       text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
     }
+
+    .countdowns {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1.25rem;
+    }
+
+    .countdown {
+      display: inline-block;
+      min-width: 215px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 0.9rem 1.4rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .countdown .cd-label { font-size: 0.85rem; color: #cbd5e1; display: block; margin-bottom: 0.25rem; }
+    .countdown .cd-num { font-size: 1.55rem; font-weight: 800; color: #facc15; font-variant-numeric: tabular-nums; }
+    .countdown .cd-sub { display: block; font-size: 0.72rem; color: #94a3b8; margin-top: 0.25rem; }
+    :root[data-theme="light"] .countdown .cd-sub { color: #64748b; }
 
     .tiles {
       display: grid;
@@ -77,23 +136,17 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .tile:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
-    }
-
-    .tile img {
-      width: 100%;
-      height: 200px;
-      object-fit: contain;
-      background: #ffffff;
-    }
+    .tile:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5); }
+    .tile img { width: 100%; height: 200px; object-fit: contain; background: #ffffff; }
+    .tile img.cover { object-fit: cover; }
 
     .tile span {
-      padding: 1.1rem;
-      font-size: 1.25rem;
+      padding: 1.1rem 0.8rem;
+      font-size: 1.15rem;
       font-weight: 700;
       text-align: center;
+      overflow-wrap: anywhere;
+      hyphens: auto;
     }
 
     .tile small {
@@ -103,6 +156,116 @@
       font-size: 0.9rem;
       margin-top: 0.25rem;
     }
+
+    .italic { font-style: italic; }
+
+    /* ---------- Widgets ---------- */
+    .widgets {
+      width: 100%;
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .widget {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 1.1rem 1.2rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .widget h2 {
+      font-size: 1rem;
+      margin-bottom: 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .widget .stand { font-size: 0.72rem; color: #94a3b8; display: block; margin-bottom: 0.9rem; }
+
+    .wrow {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      padding: 0.42rem 0;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+      font-size: 0.88rem;
+    }
+
+    .wrow:last-child { border-bottom: 0; }
+    .wrow .nm { flex: 1; color: #e2e8f0; min-width: 0; }
+    .wrow .vl { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .wrow .ch { font-size: 0.78rem; font-weight: 700; white-space: nowrap; min-width: 56px; text-align: right; }
+    .up { color: #10b981; }
+    .down { color: #f87171; }
+    .flat { color: #94a3b8; }
+
+    .wnow {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .wnow .ico { font-size: 2.4rem; line-height: 1; }
+    .wnow .tmp { font-size: 2rem; font-weight: 800; }
+    .wnow .txt { color: #cbd5e1; font-size: 0.85rem; line-height: 1.35; }
+
+    .wdays { display: flex; gap: 0.5rem; margin-bottom: 0.9rem; }
+    .wday {
+      flex: 1;
+      background: rgba(51, 65, 85, 0.5);
+      border-radius: 9px;
+      padding: 0.45rem 0.3rem;
+      text-align: center;
+      font-size: 0.76rem;
+    }
+    .wday b { display: block; font-size: 0.72rem; color: #94a3b8; font-weight: 600; }
+    .wday .d { font-size: 1.05rem; }
+
+    .snowbox { border-top: 1px solid rgba(51, 65, 85, 0.7); padding-top: 0.7rem; }
+    .snowbox h3 { font-size: 0.82rem; color: #e2e8f0; margin-bottom: 0.45rem; }
+    .snowlist { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .snowchip {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      border-radius: 999px;
+      padding: 0.22rem 0.6rem;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+    .snowchip b { font-weight: 700; }
+    .leer { color: #94a3b8; font-size: 0.8rem; line-height: 1.5; }
+
+    .wnote { color: #94a3b8; font-size: 0.72rem; margin-top: 0.8rem; line-height: 1.45; }
+    .wnote a { color: #38bdf8; }
+
+    /* Hell-Modus */
+    :root[data-theme="light"] body::before {
+      background: linear-gradient(to bottom, rgba(241, 245, 249, 0.55), rgba(241, 245, 249, 0.88));
+    }
+    :root[data-theme="light"] header h1 { color: #0f172a; text-shadow: 0 2px 10px rgba(255, 255, 255, 0.9); }
+    :root[data-theme="light"] header p { color: #334155; text-shadow: none; }
+    :root[data-theme="light"] .tile { background: rgba(255, 255, 255, 0.93); border-color: #cbd5e1; color: #0f172a; }
+    :root[data-theme="light"] .tile small { color: #64748b; }
+    :root[data-theme="light"] .snow { color: #64748b; }
+    :root[data-theme="light"] .countdown { background: rgba(255, 255, 255, 0.9); border-color: #cbd5e1; color: #0f172a; }
+    :root[data-theme="light"] .countdown .cd-label { color: #475569; }
+    :root[data-theme="light"] .countdown .cd-num { color: #b45309; }
+    :root[data-theme="light"] .top-btn { background: rgba(255, 255, 255, 0.9); border-color: #cbd5e1; color: #0f172a; }
+    :root[data-theme="light"] .widget { background: rgba(255, 255, 255, 0.93); border-color: #cbd5e1; color: #0f172a; }
+    :root[data-theme="light"] .widget .stand,
+    :root[data-theme="light"] .wnote,
+    :root[data-theme="light"] .leer { color: #64748b; }
+    :root[data-theme="light"] .wrow { border-bottom-color: #e2e8f0; }
+    :root[data-theme="light"] .wrow .nm,
+    :root[data-theme="light"] .wnow .txt { color: #334155; }
+    :root[data-theme="light"] .wday { background: #f1f5f9; }
+    :root[data-theme="light"] .snowbox { border-top-color: #e2e8f0; }
 
     /* Schneeflocken */
     .snow {
@@ -121,16 +284,46 @@
       0%   { transform: translate3d(0, 0, 0); }
       100% { transform: translate3d(30px, 110vh, 0); }
     }
-      .tile img.cover { object-fit: cover; }
-    .italic { font-style: italic; }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.9rem; }
+      .toprow { justify-content: center; }
+    }
+      .wsec {
+      font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;
+      letter-spacing: 0.05em; margin: 0.9rem 0 0.25rem;
+    }
+    .snowrow {
+      display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.6rem;
+      border-radius: 10px; background: rgba(56, 189, 248, 0.13);
+      border: 1px solid rgba(56, 189, 248, 0.4); margin-bottom: 0.42rem;
+      text-decoration: none; color: inherit; font-size: 0.83rem;
+    }
+    .snowrow:hover { background: rgba(56, 189, 248, 0.25); }
+    .snowrow .ort { font-weight: 700; white-space: nowrap; }
+    .snowrow .geo { color: #94a3b8; font-size: 0.74rem; flex: 1; min-width: 0; }
+    .snowrow .tmp2 { font-weight: 700; white-space: nowrap; }
+    .snowrow .map { font-size: 0.95rem; }
+    :root[data-theme="light"] .wsec,
+    :root[data-theme="light"] .snowrow .geo { color: #64748b; }
+    :root[data-theme="light"] .snowrow { background: rgba(2, 132, 199, 0.1); border-color: rgba(2, 132, 199, 0.35); }
   </style>
 </head>
 <body>
 
   <div class="content">
+
+    <div class="toprow">
+      <a class="top-btn" href="semesterplaner.html">📅 Semesterplaner</a>
+      <a class="top-btn" href="snake.html">🐍 Snake</a>
+      <a class="top-btn" href="rex.html">🦖 Rex</a>
+      <button class="top-btn" id="themeBtn" type="button">🌙 Dunkel</button>
+    </div>
+
     <header>
       <h1>🎄 Adventskalender 2026 (Niklas)</h1>
       <p>Wähle eine Kategorie</p>
+      <div class="countdowns" id="countdowns"></div>
     </header>
 
     <nav class="tiles">
@@ -143,32 +336,506 @@
         <span>Technik Gadgets<small>6 Ideen</small></span>
       </a>
       <a class="tile" href="lifestyle-mode.html">
-        <img class="cover" src="bilder/lifestyle-mode.jpg" alt="Lifestyle Mode">
-        <span>Lifestyle (Mode)<small>Ideen folgen</small></span>
+        <img src="bilder/lifestyle-mode.jpg" alt="Lifestyle Mode">
+        <span>Lifestyle (Mode)<small>2 Ideen</small></span>
       </a>
       <a class="tile" href="potenzielle-weihnachtsgeschenke.html">
         <img class="cover" src="bilder/geheimnis.jpg" alt="Potenzielle Weihnachtsgeschenke">
         <span class="italic">Potenzielle Weihnachtsgeschenke<small>2 Ideen</small></span>
       </a>
     </nav>
+
+    <section class="widgets">
+
+      <div class="widget">
+        <h2>📈 Finanzen</h2>
+        <span class="stand" id="finStand">wird geladen …</span>
+        <div id="finOut"></div>
+        <p class="wnote">Wechselkurse von der Europäischen Zentralbank (über Frankfurter), Aktien von Stooq, Kryptowährungen von CoinGecko. US-Aktien werden mit dem aktuellen Dollarkurs in Euro umgerechnet. Aktualisiert sich stündlich von selbst.</p>
+      </div>
+
+      <div class="widget">
+        <h2>🌤️ Wetter</h2>
+        <span class="stand" id="wetStand">wird geladen …</span>
+        <div id="wetOut"></div>
+        <p class="wnote">Wetterdaten von <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>.
+          Aktualisiert sich stündlich von selbst.</p>
+      </div>
+
+    </section>
   </div>
 
   <script>
-    (function () {
-      const count = 70;
-      for (let i = 0; i < count; i++) {
-        const flake = document.createElement('span');
-        flake.className = 'snow';
-        flake.textContent = '❄';
-        const dur = 8 + Math.random() * 12;
-        flake.style.fontSize = (8 + Math.random() * 16) + 'px';
-        flake.style.left = (Math.random() * 100) + 'vw';
-        flake.style.opacity = (0.4 + Math.random() * 0.6).toFixed(2);
-        flake.style.animationDuration = dur + 's';
-        flake.style.animationDelay = (-Math.random() * dur) + 's';
-        document.body.appendChild(flake);
+  /* ---------- Hell/Dunkel ---------- */
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('themeBtn');
+    function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+    function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+    function apply(mode) {
+      root.dataset.theme = mode;
+      btn.textContent = mode === 'light' ? '☀️ Hell' : '🌙 Dunkel';
+      set('theme', mode);
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', mode === 'light' ? '#f1f5f9' : '#0f172a');
+    }
+    apply(get('theme') === 'light' ? 'light' : 'dark');
+    btn.addEventListener('click', function () {
+      apply(root.dataset.theme === 'light' ? 'dark' : 'light');
+    });
+  })();
+
+  /* ---------- Schneeflocken ---------- */
+  (function () {
+    for (var i = 0; i < 70; i++) {
+      var flake = document.createElement('span');
+      flake.className = 'snow';
+      flake.textContent = '❄';
+      var dur = 8 + Math.random() * 12;
+      flake.style.fontSize = (16 + Math.random() * 30) + 'px';
+      flake.style.left = (Math.random() * 100) + 'vw';
+      flake.style.opacity = (0.4 + Math.random() * 0.6).toFixed(2);
+      flake.style.animationDuration = dur + 's';
+      flake.style.animationDelay = (-Math.random() * dur) + 's';
+      document.body.appendChild(flake);
+    }
+  })();
+
+  /* ---------- Countdown: Tuerchen, Advent, Silvester ---------- */
+  (function () {
+    var box = document.getElementById('countdowns');
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    /* 4. Advent ist der Sonntag vor dem 25. Dezember */
+    function advente(jahr) {
+      var w = new Date(jahr, 11, 25);
+      var vierter = new Date(jahr, 11, 25 - (w.getDay() === 0 ? 7 : w.getDay()));
+      var liste = [];
+      for (var i = 3; i >= 0; i--) {
+        liste.push(new Date(vierter.getFullYear(), vierter.getMonth(), vierter.getDate() - i * 7));
       }
-    })();
+      return liste;   /* [1. Advent, 2., 3., 4.] */
+    }
+
+    function ziele() {
+      var now = new Date(), j = now.getFullYear();
+      var raus = [];
+
+      /* 1) Tuerchen bzw. Heiligabend */
+      var start = new Date(j, 11, 1), heiligabend = new Date(j, 11, 24, 18, 0);
+      if (now < start)             raus.push({ t: 'Bis zum 1. Türchen', z: start, s: '1. Dezember' });
+      else if (now < heiligabend)  raus.push({ t: 'Bis Heiligabend', z: heiligabend, s: '24. Dezember' });
+      else                         raus.push({ t: 'Frohe Weihnachten!', z: null, s: '🎄' });
+
+      /* 2) naechster Advent */
+      var liste = advente(j);
+      var naechster = null, nr = 0;
+      for (var i = 0; i < 4; i++) {
+        if (now < liste[i]) { naechster = liste[i]; nr = i + 1; break; }
+      }
+      if (!naechster) { naechster = advente(j + 1)[0]; nr = 1; }
+      raus.push({
+        t: 'Bis zum ' + nr + '. Advent',
+        z: naechster,
+        s: naechster.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })
+      });
+
+      /* 3) Silvester bzw. Jahreswechsel */
+      var neujahr = new Date(j + 1, 0, 1, 0, 0, 0);
+      raus.push({ t: 'Bis Silvester', z: neujahr, s: 'Jahreswechsel ' + j + '/' + String(j + 1).slice(2) });
+
+      return raus;
+    }
+
+    var felder = [];
+    function bauen() {
+      box.innerHTML = '';
+      felder = ziele().map(function (k) {
+        var el = document.createElement('div');
+        el.className = 'countdown';
+        el.innerHTML = '<span class="cd-label"></span><span class="cd-num">–</span><span class="cd-sub"></span>';
+        el.querySelector('.cd-label').textContent = k.t;
+        el.querySelector('.cd-sub').textContent = k.s || '';
+        box.appendChild(el);
+        return { k: k, num: el.querySelector('.cd-num') };
+      });
+    }
+    bauen();
+
+    var letzterTag = new Date().getDate();
+    function tick() {
+      var now = new Date();
+      if (now.getDate() !== letzterTag) { letzterTag = now.getDate(); bauen(); }
+      felder.forEach(function (f) {
+        if (!f.k.z) { f.num.textContent = '🎄'; return; }
+        var ms = f.k.z - now;
+        if (ms <= 0) { f.num.textContent = 'Jetzt!'; return; }
+        var t = Math.floor(ms / 864e5); ms -= t * 864e5;
+        var h = Math.floor(ms / 36e5);  ms -= h * 36e5;
+        var m = Math.floor(ms / 6e4);   ms -= m * 6e4;
+        var sek = Math.floor(ms / 1e3);
+        f.num.textContent = (t > 0 ? t + (t === 1 ? ' Tag  ' : ' Tage  ') : '') + pad(h) + ':' + pad(m) + ':' + pad(sek);
+      });
+    }
+    tick(); setInterval(tick, 1000);
+  })();
+
+  /* ---------- gemeinsame Helfer ---------- */
+  var STUNDE = 3600 * 1000;
+  function cacheGet(k, maxAlter) {
+    try {
+      var r = JSON.parse(localStorage.getItem(k) || 'null');
+      if (r && Date.now() - r.t < maxAlter) return r;
+    } catch (e) {}
+    return null;
+  }
+  function cacheSet(k, d) {
+    try { localStorage.setItem(k, JSON.stringify({ t: Date.now(), d: d })); } catch (e) {}
+  }
+  function uhrzeit(ms) {
+    var d = new Date(ms);
+    return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  }
+  function hol(url) {
+    return fetch(url, { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
+  }
+
+  /* Manche Anbieter erlauben keinen direkten Zugriff aus dem Browser.
+     Dann wird es ueber einen oeffentlichen Weiterleiter noch einmal versucht. */
+  var WEGE = [
+    function (u) { return u; },
+    function (u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); },
+    function (u) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u); }
+  ];
+  async function holText(url) {
+    for (var i = 0; i < WEGE.length; i++) {
+      try {
+        var r = await fetch(WEGE[i](url), { cache: 'no-store' });
+        if (!r.ok) continue;
+        var t = await r.text();
+        if (t && t.length > 20) return t;
+      } catch (e) {}
+    }
+    return null;
+  }
+  async function holJson(url) {
+    var t = await holText(url);
+    if (!t) return null;
+    try { return JSON.parse(t); } catch (e) { return null; }
+  }
+
+  /* ---------- Finanzen ---------- */
+  (function () {
+    var out = document.getElementById('finOut');
+    var stand = document.getElementById('finStand');
+    var KEY = 'fin-cache-v3';
+
+    var AKTIEN = [
+      ['unh.us', 'UnitedHealth',     'USD'],
+      ['cvs.us', 'CVS Health',       'USD'],
+      ['bdx.us', 'Becton Dickinson', 'USD'],
+      ['pfe.us', 'Pfizer',           'USD'],
+      ['san.fr', 'Sanofi',           'EUR'],
+      ['bei.de', 'Beiersdorf',       'EUR']
+    ];
+
+    function titel(t) { var h = document.createElement('div'); h.className = 'wsec'; h.textContent = t; return h; }
+    function hinweis(t) { var p = document.createElement('p'); p.className = 'leer'; p.textContent = t; return p; }
+    function zeile(name, wert, aenderung) {
+      var r = document.createElement('div');
+      r.className = 'wrow';
+      var n = document.createElement('span'); n.className = 'nm'; n.textContent = name;
+      var v = document.createElement('span'); v.className = 'vl'; v.textContent = wert;
+      r.appendChild(n); r.appendChild(v);
+      if (aenderung !== null && aenderung !== undefined && isFinite(aenderung)) {
+        var c = document.createElement('span');
+        c.className = 'ch ' + (aenderung > 0.05 ? 'up' : aenderung < -0.05 ? 'down' : 'flat');
+        c.textContent = (aenderung > 0 ? '▲ +' : aenderung < 0 ? '▼ ' : '– ') + aenderung.toFixed(2) + ' %';
+        r.appendChild(c);
+      }
+      return r;
+    }
+    function eur(v, stellen) {
+      return v.toLocaleString('de-DE', { minimumFractionDigits: stellen, maximumFractionDigits: stellen }) + ' €';
+    }
+
+    function male(d) {
+      out.innerHTML = '';
+      out.appendChild(titel('Währungen'));
+      if (d.kurse && d.kurse.USD) {
+        out.appendChild(zeile('1 Euro in Dollar', d.kurse.USD.toFixed(4) + ' $'));
+        out.appendChild(zeile('1 Dollar in Euro', (1 / d.kurse.USD).toFixed(4) + ' €'));
+        ['CHF', 'GBP', 'JPY'].forEach(function (k) {
+          if (d.kurse[k]) out.appendChild(zeile('1 Euro in ' + k, d.kurse[k].toFixed(k === 'JPY' ? 1 : 4)));
+        });
+      } else {
+        out.appendChild(hinweis('Die Wechselkurse liessen sich gerade nicht laden.'));
+      }
+
+      out.appendChild(titel('Aktien in Euro'));
+      if (d.aktien && d.aktien.length) {
+        d.aktien.forEach(function (a) { out.appendChild(zeile(a.name, eur(a.eur, 2), a.ch)); });
+      } else {
+        out.appendChild(hinweis('Die Aktienkurse liessen sich gerade nicht laden.'));
+      }
+
+      if (d.krypto && Object.keys(d.krypto).length) {
+        out.appendChild(titel('Krypto'));
+        Object.keys(d.krypto).forEach(function (k) {
+          var m = d.krypto[k];
+          out.appendChild(zeile(m.name, eur(Math.round(m.preis), 0), m.ch));
+        });
+      }
+    }
+
+    /* Wechselkurse: mehrere Anbieter nacheinander versuchen */
+    async function kurse() {
+      var quellen = [
+        'https://api.frankfurter.dev/v1/latest?base=EUR&symbols=USD,CHF,GBP,JPY',
+        'https://open.er-api.com/v6/latest/EUR',
+        'https://api.frankfurter.app/latest?from=EUR&to=USD,CHF,GBP,JPY'
+      ];
+      for (var i = 0; i < quellen.length; i++) {
+        var j = await holJson(quellen[i]);
+        if (j && j.rates && j.rates.USD) return j.rates;
+      }
+      return null;
+    }
+
+    function csvAktien(text, usdProEuro) {
+      var zeilen = text.trim().split(/\r?\n/);
+      if (zeilen.length < 2) return [];
+      var kopf = zeilen[0].toLowerCase().split(',');
+      var iS = kopf.indexOf('symbol'), iO = kopf.indexOf('open'), iC = kopf.indexOf('close');
+      if (iS < 0 || iC < 0) return [];
+      var raus = [];
+      for (var i = 1; i < zeilen.length; i++) {
+        var f = zeilen[i].split(',');
+        var sym = (f[iS] || '').toLowerCase().trim();
+        var close = parseFloat(f[iC]), open = parseFloat(f[iO]);
+        if (!isFinite(close) || close <= 0) continue;
+        var def = null;
+        for (var k = 0; k < AKTIEN.length; k++) if (AKTIEN[k][0] === sym) def = AKTIEN[k];
+        if (!def) continue;
+        var inEur = def[2] === 'EUR' ? close : (usdProEuro ? close / usdProEuro : null);
+        if (inEur === null) continue;
+        raus.push({ name: def[1], eur: inEur, ch: isFinite(open) && open > 0 ? (close - open) / open * 100 : null });
+      }
+      return raus;
+    }
+
+    async function laden() {
+      var c = cacheGet(KEY, STUNDE);
+      if (c) { male(c.d); stand.textContent = 'Stand ' + uhrzeit(c.t) + ' Uhr'; return; }
+      stand.textContent = 'wird geladen …';
+      var daten = {};
+
+      daten.kurse = await kurse();
+
+      var kj = await holJson('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=eur&include_24hr_change=true');
+      if (kj) {
+        daten.krypto = {};
+        if (kj.bitcoin)  daten.krypto.btc = { name: 'Bitcoin',  preis: kj.bitcoin.eur,  ch: kj.bitcoin.eur_24h_change };
+        if (kj.ethereum) daten.krypto.eth = { name: 'Ethereum', preis: kj.ethereum.eur, ch: kj.ethereum.eur_24h_change };
+      }
+
+      var symbole = AKTIEN.map(function (x) { return x[0]; }).join('+');
+      var csv = await holText('https://stooq.com/q/l/?s=' + symbole + '&f=sd2t2ohlcv&h&e=csv');
+      if (csv) daten.aktien = csvAktien(csv, daten.kurse && daten.kurse.USD);
+
+      male(daten);
+      var etwas = (daten.kurse && daten.kurse.USD) || (daten.aktien && daten.aktien.length) ||
+                  (daten.krypto && Object.keys(daten.krypto).length);
+      if (etwas) {
+        cacheSet(KEY, daten);
+        stand.textContent = 'Stand ' + uhrzeit(Date.now()) + ' Uhr';
+      } else {
+        stand.textContent = 'gerade nicht erreichbar';
+      }
+    }
+    laden();
+    setInterval(function () { try { localStorage.removeItem(KEY); } catch (e) {} laden(); }, STUNDE);
+  })();
+
+  /* ---------- Wetter ---------- */
+  (function () {
+    var out = document.getElementById('wetOut');
+    var stand = document.getElementById('wetStand');
+    var KEY = 'wetter-cache-v2';
+
+    /* Name, Land, Kontinent, Breite, Laenge */
+    var ORTE = [
+      ['Reykjavík', 'Island', 'Europa', 64.15, -21.94],
+      ['Tromsø', 'Norwegen', 'Europa', 69.65, 18.96],
+      ['Rovaniemi', 'Finnland', 'Europa', 66.50, 25.73],
+      ['Oslo', 'Norwegen', 'Europa', 59.91, 10.75],
+      ['Moskau', 'Russland', 'Europa', 55.75, 37.62],
+      ['Innsbruck', 'Österreich', 'Europa', 47.27, 11.39],
+      ['Zermatt', 'Schweiz', 'Europa', 46.02, 7.75],
+      ['Davos', 'Schweiz', 'Europa', 46.80, 9.83],
+      ['Sapporo', 'Japan', 'Asien', 43.06, 141.35],
+      ['Harbin', 'China', 'Asien', 45.80, 126.53],
+      ['Lhasa', 'Tibet, China', 'Asien', 29.65, 91.12],
+      ['Nuuk', 'Grönland', 'Nordamerika', 64.18, -51.69],
+      ['Anchorage', 'USA', 'Nordamerika', 61.22, -149.90],
+      ['Québec', 'Kanada', 'Nordamerika', 46.81, -71.21],
+      ['Denver', 'USA', 'Nordamerika', 39.74, -104.99],
+      ['Ushuaia', 'Argentinien', 'Südamerika', -54.80, -68.30]
+    ];
+    var SCHNEE_CODES = [71, 73, 75, 77, 85, 86];
+
+    var WMO = {
+      0: ['☀️', 'klar'], 1: ['🌤️', 'überwiegend klar'],
+      2: ['⛅', 'teils bewölkt'], 3: ['☁️', 'bedeckt'],
+      45: ['🌫️', 'Nebel'], 48: ['🌫️', 'Reifnebel'],
+      51: ['🌦️', 'leichter Niesel'], 53: ['🌦️', 'Niesel'],
+      55: ['🌦️', 'starker Niesel'],
+      56: ['🌧️', 'gefrierender Niesel'], 57: ['🌧️', 'gefrierender Niesel'],
+      61: ['🌧️', 'leichter Regen'], 63: ['🌧️', 'Regen'],
+      65: ['🌧️', 'starker Regen'],
+      66: ['🌧️', 'gefrierender Regen'], 67: ['🌧️', 'gefrierender Regen'],
+      71: ['🌨️', 'leichter Schneefall'], 73: ['🌨️', 'Schneefall'],
+      75: ['❄️', 'starker Schneefall'], 77: ['🌨️', 'Schneegriesel'],
+      80: ['🌦️', 'Regenschauer'], 81: ['🌦️', 'Regenschauer'],
+      82: ['⛈️', 'starke Schauer'],
+      85: ['🌨️', 'Schneeschauer'], 86: ['❄️', 'starke Schneeschauer'],
+      95: ['⛈️', 'Gewitter'], 96: ['⛈️', 'Gewitter mit Hagel'], 99: ['⛈️', 'Gewitter mit Hagel']
+    };
+    function wmo(c) { return WMO[c] || ['🌡️', '—']; }
+    function karte(o) {
+      return 'https://www.google.com/maps/search/?api=1&query=' + o.lat + ',' + o.lon;
+    }
+
+    function male(d) {
+      out.innerHTML = '';
+      if (d.fn) {
+        var w = wmo(d.fn.code);
+        var jetzt = document.createElement('div');
+        jetzt.className = 'wnow';
+        jetzt.innerHTML = '<span class="ico"></span><div><div class="tmp"></div><div class="txt"></div></div>';
+        jetzt.querySelector('.ico').textContent = w[0];
+        jetzt.querySelector('.tmp').textContent = Math.round(d.fn.temp) + ' °C';
+        jetzt.querySelector('.txt').textContent = 'Friedrichshafen · Deutschland · Europa · ' + w[1];
+        out.appendChild(jetzt);
+
+        if (d.fn.tage && d.fn.tage.length) {
+          var tg = document.createElement('div');
+          tg.className = 'wdays';
+          d.fn.tage.forEach(function (t) {
+            var el = document.createElement('div');
+            el.className = 'wday';
+            el.innerHTML = '<b></b><span class="d"></span><span></span>';
+            el.querySelector('b').textContent = t.name;
+            el.querySelector('.d').textContent = wmo(t.code)[0];
+            el.querySelector('span:last-child').textContent = Math.round(t.max) + '° / ' + Math.round(t.min) + '°';
+            tg.appendChild(el);
+          });
+          out.appendChild(tg);
+        }
+      } else {
+        out.innerHTML = '<p class="leer">Das Wetter liess sich gerade nicht laden.</p>';
+      }
+
+      var box = document.createElement('div');
+      box.className = 'snowbox';
+      var h3 = document.createElement('h3');
+      box.appendChild(h3);
+
+      function reihe(s) {
+        var a = document.createElement('a');
+        a.className = 'snowrow';
+        a.href = karte(s); a.target = '_blank'; a.rel = 'noopener';
+        a.innerHTML = '<span class="ort"></span><span class="geo"></span><span class="tmp2"></span><span class="map">🗺️</span>';
+        a.querySelector('.ort').textContent = s.ort;
+        a.querySelector('.geo').textContent = s.land + ' · ' + s.kontinent;
+        a.querySelector('.tmp2').textContent = Math.round(s.temp) + ' °C';
+        a.title = s.ort + ', ' + s.land + ' (' + s.kontinent + ') – auf Google Maps ansehen';
+        return a;
+      }
+
+      if (d.schnee && d.schnee.length) {
+        h3.textContent = '❄️ Gerade schneit es in:';
+        d.schnee.forEach(function (s) { box.appendChild(reihe(s)); });
+      } else if (d.kalt && d.kalt.length) {
+        h3.textContent = '❄️ Gerade schneit es an keinem der 16 geprüften Orte.';
+        var p = document.createElement('p');
+        p.className = 'leer';
+        p.style.marginBottom = '0.5rem';
+        p.textContent = 'Am kältesten ist es hier:';
+        box.appendChild(p);
+        d.kalt.forEach(function (s) { box.appendChild(reihe(s)); });
+      } else {
+        h3.textContent = '❄️ Schnee-Orte';
+        var p2 = document.createElement('p');
+        p2.className = 'leer';
+        p2.textContent = 'Die Schnee-Übersicht liess sich gerade nicht laden.';
+        box.appendChild(p2);
+      }
+      out.appendChild(box);
+    }
+
+    function laden() {
+      var c = cacheGet(KEY, STUNDE);
+      if (c) { male(c.d); stand.textContent = 'Stand ' + uhrzeit(c.t) + ' Uhr'; return; }
+      stand.textContent = 'wird geladen …';
+      var daten = {};
+
+      var a = hol('https://api.open-meteo.com/v1/forecast?latitude=47.6500&longitude=9.4800' +
+                  '&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min' +
+                  '&timezone=Europe%2FBerlin&forecast_days=3')
+        .then(function (j) {
+          var tage = [];
+          if (j.daily && j.daily.time) {
+            for (var i = 0; i < j.daily.time.length; i++) {
+              var d = new Date(j.daily.time[i] + 'T12:00');
+              tage.push({
+                name: i === 0 ? 'heute' : d.toLocaleDateString('de-DE', { weekday: 'short' }),
+                code: j.daily.weather_code[i],
+                max: j.daily.temperature_2m_max[i],
+                min: j.daily.temperature_2m_min[i]
+              });
+            }
+          }
+          daten.fn = { temp: j.current.temperature_2m, code: j.current.weather_code, tage: tage };
+        }).catch(function () {});
+
+      var lat = ORTE.map(function (o) { return o[3]; }).join(',');
+      var lon = ORTE.map(function (o) { return o[4]; }).join(',');
+      var b = hol('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
+                  '&current=temperature_2m,weather_code,snowfall&timezone=auto')
+        .then(function (j) {
+          var arr = Array.isArray(j) ? j : [j];
+          var alle = arr.map(function (x, i) {
+            var o = ORTE[i] || ['?', '?', '?', 0, 0];
+            return {
+              ort: o[0], land: o[1], kontinent: o[2], lat: o[3], lon: o[4],
+              temp: x.current.temperature_2m,
+              code: x.current.weather_code,
+              schnee: x.current.snowfall
+            };
+          });
+          daten.schnee = alle.filter(function (s) {
+            return (s.schnee && s.schnee > 0) || SCHNEE_CODES.indexOf(s.code) >= 0;
+          });
+          daten.kalt = alle.slice().sort(function (p, q) { return p.temp - q.temp; }).slice(0, 3);
+        }).catch(function () {});
+
+      Promise.all([a, b]).then(function () {
+        male(daten);
+        if (daten.fn || (daten.schnee && daten.schnee.length) || (daten.kalt && daten.kalt.length)) {
+          cacheSet(KEY, daten);
+          stand.textContent = 'Stand ' + uhrzeit(Date.now()) + ' Uhr';
+        } else {
+          stand.textContent = 'gerade nicht erreichbar';
+        }
+      });
+    }
+    laden();
+    setInterval(function () { try { localStorage.removeItem(KEY); } catch (e) {} laden(); }, STUNDE);
+  })();
   </script>
 </body>
 </html>

@@ -726,12 +726,19 @@ const WEGE = [
   function(u){ return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
   function(u){ return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u); }
 ];
+/* Jeder Versuch bekommt ein Zeitlimit, damit die Seite nie haengen bleibt. */
+async function fetchMitFrist(url, ms){
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  try { return await fetch(url, { cache: "no-store", signal: ctrl.signal }); }
+  finally { clearTimeout(timer); }
+}
 async function hole(url, mitUmweg){
   const wege = mitUmweg ? WEGE : [WEGE[0]];
   for (const weg of wege){
     try{
-      const r = await fetch(weg(url), { cache: "no-store" });
-      if (!r.ok) continue;
+      const r = await fetchMitFrist(weg(url), 7000);
+      if (!r || !r.ok) continue;
       const text = await r.text();
       if (!text || text.length < 50) continue;
       const tage = parseMensa(text);
@@ -740,26 +747,40 @@ async function hole(url, mitUmweg){
   }
   return null;
 }
+function setzeTage(tage, ersatzStand){
+  const heuteK = key(new Date());
+  const vorher = mensa.tag;
+  mensa.tage = tage;
+  mensa.ersatz = ersatzStand || null;
+  mensa.status = "ok";
+  const behalten = vorher && tage.some(t => t.datum === vorher);
+  if (!behalten){
+    const pick = tage.find(t => t.datum >= heuteK) || tage[tage.length - 1];
+    mensa.tag = pick ? pick.datum : null;
+  }
+  zeigeMensa();
+}
+
 async function ladeMensa(){
   if (mensa.status === "laedt" || mensa.status === "ok") return;
-  mensa.status = "laedt"; zeigeMensa();
+  mensa.status = "laedt";
+
+  /* 1) Sofort den mitgelieferten Ersatzplan anzeigen, damit nie ein leeres Feld dasteht. */
+  const ersatz = window.MENSA_PLAN && window.MENSA_PLAN.tage;
+  if (ersatz && ersatz.length) setzeTage(ersatz, window.MENSA_PLAN.stand);
+  else zeigeMensa();
+
+  /* 2) Im Hintergrund den echten Plan holen und, falls er kommt, austauschen. */
   const heuteK = key(new Date());
   const frisch = t => t && t.some(x => x.datum >= heuteK);
   let tage = await hole("mensa.xml?t=" + Date.now(), false);
   if (!frisch(tage)){
     const live = await hole(MENSA_XML, true);
-    if (live && live.length) tage = live;
+    if (frisch(live)) tage = live;
   }
-  /* Wenn nichts Aktuelles ankommt: den mitgelieferten Ersatzplan nehmen */
-  if (!frisch(tage) && window.MENSA_PLAN && window.MENSA_PLAN.tage && window.MENSA_PLAN.tage.length){
-    tage = window.MENSA_PLAN.tage;
-    mensa.ersatz = window.MENSA_PLAN.stand;
-  }
-  mensa.tage = tage || [];
-  mensa.status = mensa.tage.length ? "ok" : "fehler";
-  const pick = mensa.tage.find(t => t.datum >= heuteK) || mensa.tage[mensa.tage.length - 1];
-  mensa.tag = pick ? pick.datum : null;
-  zeigeMensa();
+  if (frisch(tage)) setzeTage(tage, null);
+  else if (!mensa.tage.length){ mensa.status = "fehler"; zeigeMensa(); }
+  else mensa.status = "ok";
 }
 const euro = v => v ? String(v).replace(".", ",") + " €" : "";
 const chefkoch = n => "https://www.chefkoch.de/rs/s0/" + encodeURIComponent(n.split(/\s+(?:mit|dazu|an|auf)\s+/i)[0]) + "/Rezepte.html";

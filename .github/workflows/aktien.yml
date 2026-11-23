@@ -1,0 +1,135 @@
+# Holt die Aktienkurse einmal pro Stunde und legt sie als aktien.json ab.
+# US-Werte kommen von Finnhub (Schluessel steckt im Secret FINNHUB_KEY),
+# die europaeischen Werte von Stooq. Beides laeuft auf dem Server, nicht im Browser.
+name: Aktienkurse aktualisieren
+
+on:
+  schedule:
+    - cron: "7 * * * *"      # stuendlich um :07
+  workflow_dispatch:          # Knopf zum manuellen Starten
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Kurse holen
+        env:
+          FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request, datetime
+
+          KEY = os.environ.get("FINNHUB_KEY", "").strip()
+
+          # Name, Finnhub-Kuerzel (US), Stooq-Kuerzel, Waehrung
+          WERTE = [
+              ("UnitedHealth",     "UNH", "unh.us", "USD"),
+              ("CVS Health",       "CVS", "cvs.us", "USD"),
+              ("Becton Dickinson", "BDX", "bdx.us", "USD"),
+              ("Pfizer",           "PFE", "pfe.us", "USD"),
+              ("Sanofi",           None,  "san.fr", "EUR"),
+              ("Beiersdorf",       None,  "bei.de", "EUR"),
+          ]
+
+          def lade(url, timeout=25):
+              req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+              with urllib.request.urlopen(req, timeout=timeout) as r:
+                  return r.read().decode("utf-8", "replace")
+
+          # Dollarkurs zum Umrechnen
+          usd = None
+          for u in ("https://api.frankfurter.dev/v1/latest?base=EUR&symbols=USD",
+                    "https://open.er-api.com/v6/latest/EUR"):
+              try:
+                  usd = json.loads(lade(u))["rates"]["USD"]
+                  break
+              except Exception as e:
+                  print("Dollarkurs fehlgeschlagen:", u, e)
+          print("EUR/USD:", usd)
+
+          # Stooq auf einen Schlag
+          stooq = {}
+          try:
+              sym = "+".join(w[2] for w in WERTE)
+              text = lade("https://stooq.com/q/l/?s=%s&f=sd2t2ohlcv&h&e=csv" % sym)
+              zeilen = text.strip().splitlines()
+              kopf = [k.strip().lower() for k in zeilen[0].split(",")]
+              iS, iO, iC = kopf.index("symbol"), kopf.index("open"), kopf.index("close")
+              for z in zeilen[1:]:
+                  f = z.split(",")
+                  try:
+                      c, o = float(f[iC]), float(f[iO])
+                  except ValueError:
+                      continue
+                  if c > 0:
+                      stooq[f[iS].strip().lower()] = (c, o)
+              print("Stooq gelesen:", list(stooq))
+          except Exception as e:
+              print("Stooq fehlgeschlagen:", e)
+
+          raus = []
+          for name, fh, st, waehrung in WERTE:
+              preis = aender = None
+
+              if fh and KEY:
+                  try:
+                      q = json.loads(lade("https://finnhub.io/api/v1/quote?symbol=%s&token=%s" % (fh, KEY)))
+                      if q.get("c"):
+                          preis, aender = float(q["c"]), q.get("dp")
+                          print("Finnhub", fh, preis)
+                  except Exception as e:
+                      print("Finnhub fehlgeschlagen:", fh, e)
+
+              if preis is None and st in stooq:
+                  c, o = stooq[st]
+                  preis = c
+                  aender = (c - o) / o * 100 if o > 0 else None
+                  print("Stooq", st, preis)
+
+              if preis is None:
+                  print("kein Kurs fuer", name)
+                  continue
+
+              if waehrung == "EUR":
+                  in_eur = preis
+              elif usd:
+                  in_eur = preis / usd
+              else:
+                  print("ohne Dollarkurs nicht umrechenbar:", name)
+                  continue
+
+              raus.append({
+                  "name": name,
+                  "eur": round(in_eur, 2),
+                  "ch": round(float(aender), 2) if aender is not None else None,
+              })
+
+          if not raus:
+              raise SystemExit("Keine einzige Aktie geladen - aktien.json bleibt unveraendert.")
+
+          daten = {
+              "stand": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="minutes"),
+              "eurusd": round(usd, 4) if usd else None,
+              "aktien": raus,
+          }
+          with open("aktien.json", "w", encoding="utf-8") as f:
+              json.dump(daten, f, ensure_ascii=False, indent=1)
+          print("geschrieben:", len(raus), "Werte")
+          PY
+
+      - name: Aenderung speichern
+        run: |
+          if git diff --quiet -- aktien.json; then
+            echo "Keine Aenderung."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add aktien.json
+          git commit -m "Aktienkurse aktualisiert"
+          git push

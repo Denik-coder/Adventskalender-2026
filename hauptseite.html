@@ -351,7 +351,7 @@
         <h2>📈 Finanzen</h2>
         <span class="stand" id="finStand">wird geladen …</span>
         <div id="finOut"></div>
-        <p class="wnote">Wechselkurse von der Europäischen Zentralbank (über Frankfurter), Aktien von Stooq, Kryptowährungen von CoinGecko. US-Aktien werden mit dem aktuellen Dollarkurs in Euro umgerechnet. Aktualisiert sich stündlich von selbst.</p>
+        <p class="wnote">Wechselkurse von der Europäischen Zentralbank (über Frankfurter), Aktien von Yahoo Finance, Kryptowährungen von CoinGecko. US-Aktien werden mit dem aktuellen Dollarkurs in Euro umgerechnet. Aktualisiert sich stündlich von selbst.</p>
       </div>
 
       <div class="widget">
@@ -510,16 +510,29 @@
     function (u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); },
     function (u) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u); }
   ];
+  async function fetchMitFrist(url, ms) {
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, ms || 7000);
+    try { return await fetch(url, { cache: 'no-store', signal: ctrl.signal }); }
+    finally { clearTimeout(timer); }
+  }
   async function holText(url) {
     for (var i = 0; i < WEGE.length; i++) {
       try {
-        var r = await fetch(WEGE[i](url), { cache: 'no-store' });
-        if (!r.ok) continue;
+        var r = await fetchMitFrist(WEGE[i](url), 7000);
+        if (!r || !r.ok) continue;
         var t = await r.text();
         if (t && t.length > 20) return t;
       } catch (e) {}
     }
     return null;
+  }
+  async function direktJson(url, ms) {
+    try {
+      var r = await fetchMitFrist(url, ms || 6000);
+      if (!r || !r.ok) return null;
+      return await r.json();
+    } catch (e) { return null; }
   }
   async function holJson(url) {
     var t = await holText(url);
@@ -533,13 +546,14 @@
     var stand = document.getElementById('finStand');
     var KEY = 'fin-cache-v3';
 
+    /* Stooq-Kuerzel, Name, Waehrung, Yahoo-Kuerzel */
     var AKTIEN = [
-      ['unh.us', 'UnitedHealth',     'USD'],
-      ['cvs.us', 'CVS Health',       'USD'],
-      ['bdx.us', 'Becton Dickinson', 'USD'],
-      ['pfe.us', 'Pfizer',           'USD'],
-      ['san.fr', 'Sanofi',           'EUR'],
-      ['bei.de', 'Beiersdorf',       'EUR']
+      ['unh.us', 'UnitedHealth',     'USD', 'UNH'],
+      ['cvs.us', 'CVS Health',       'USD', 'CVS'],
+      ['bdx.us', 'Becton Dickinson', 'USD', 'BDX'],
+      ['pfe.us', 'Pfizer',           'USD', 'PFE'],
+      ['san.fr', 'Sanofi',           'EUR', 'SAN.PA'],
+      ['bei.de', 'Beiersdorf',       'EUR', 'BEI.DE']
     ];
 
     function titel(t) { var h = document.createElement('div'); h.className = 'wsec'; h.textContent = t; return h; }
@@ -578,6 +592,8 @@
       out.appendChild(titel('Aktien in Euro'));
       if (d.aktien && d.aktien.length) {
         d.aktien.forEach(function (a) { out.appendChild(zeile(a.name, eur(a.eur, 2), a.ch)); });
+      } else if (d.aktien === undefined) {
+        out.appendChild(hinweis('werden geladen \u2026'));
       } else {
         out.appendChild(hinweis('Die Aktienkurse liessen sich gerade nicht laden.'));
       }
@@ -599,7 +615,7 @@
         'https://api.frankfurter.app/latest?from=EUR&to=USD,CHF,GBP,JPY'
       ];
       for (var i = 0; i < quellen.length; i++) {
-        var j = await holJson(quellen[i]);
+        var j = await direktJson(quellen[i]);
         if (j && j.rates && j.rates.USD) return j.rates;
       }
       return null;
@@ -627,6 +643,39 @@
       return raus;
     }
 
+    /* Kurs einer einzelnen Aktie bei Yahoo Finance */
+    async function yahoo(def, usdProEuro) {
+      var j = await holJson('https://query1.finance.yahoo.com/v8/finance/chart/' +
+                            encodeURIComponent(def[3]) + '?interval=1d&range=5d');
+      var m = j && j.chart && j.chart.result && j.chart.result[0] && j.chart.result[0].meta;
+      if (!m || !isFinite(m.regularMarketPrice) || m.regularMarketPrice <= 0) return null;
+      var waehrung = String(m.currency || def[2]).toUpperCase();
+      var preis = m.regularMarketPrice;
+      var vorher = m.chartPreviousClose || m.previousClose;
+      var inEur;
+      if (waehrung === 'EUR') inEur = preis;
+      else if (waehrung === 'USD' && usdProEuro) inEur = preis / usdProEuro;
+      else return null;
+      return {
+        name: def[1],
+        eur: inEur,
+        ch: isFinite(vorher) && vorher > 0 ? (preis - vorher) / vorher * 100 : null
+      };
+    }
+
+    /* Zuerst Yahoo, danach Stooq als Ersatz */
+    async function aktien(usdProEuro) {
+      var ergebnis = await Promise.all(AKTIEN.map(function (a) {
+        return yahoo(a, usdProEuro).catch(function () { return null; });
+      }));
+      var liste = ergebnis.filter(Boolean);
+      if (liste.length) return liste;
+
+      var symbole = AKTIEN.map(function (x) { return x[0]; }).join('+');
+      var csv = await holText('https://stooq.com/q/l/?s=' + symbole + '&f=sd2t2ohlcv&h&e=csv');
+      return csv ? csvAktien(csv, usdProEuro) : [];
+    }
+
     async function laden() {
       var c = cacheGet(KEY, STUNDE);
       if (c) { male(c.d); stand.textContent = 'Stand ' + uhrzeit(c.t) + ' Uhr'; return; }
@@ -635,16 +684,18 @@
 
       daten.kurse = await kurse();
 
-      var kj = await holJson('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=eur&include_24hr_change=true');
+      var kj = await direktJson('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=eur&include_24hr_change=true');
       if (kj) {
         daten.krypto = {};
         if (kj.bitcoin)  daten.krypto.btc = { name: 'Bitcoin',  preis: kj.bitcoin.eur,  ch: kj.bitcoin.eur_24h_change };
         if (kj.ethereum) daten.krypto.eth = { name: 'Ethereum', preis: kj.ethereum.eur, ch: kj.ethereum.eur_24h_change };
       }
 
-      var symbole = AKTIEN.map(function (x) { return x[0]; }).join('+');
-      var csv = await holText('https://stooq.com/q/l/?s=' + symbole + '&f=sd2t2ohlcv&h&e=csv');
-      if (csv) daten.aktien = csvAktien(csv, daten.kurse && daten.kurse.USD);
+      /* Waehrungen und Krypto sofort zeigen, Aktien dauern laenger */
+      male(daten);
+      if (daten.kurse && daten.kurse.USD) stand.textContent = 'Stand ' + uhrzeit(Date.now()) + ' Uhr';
+
+      daten.aktien = await aktien(daten.kurse && daten.kurse.USD);
 
       male(daten);
       var etwas = (daten.kurse && daten.kurse.USD) || (daten.aktien && daten.aktien.length) ||
